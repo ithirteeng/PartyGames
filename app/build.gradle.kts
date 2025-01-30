@@ -1,6 +1,6 @@
 plugins {
-    alias(stack.plugins.android.application)
-    alias(stack.plugins.jetbrains.kotlin.android)
+    android
+    `kotlin-android`
 }
 
 android {

@@ -1,6 +1,6 @@
 plugins {
-    alias(stack.plugins.android.library)
-    alias(stack.plugins.jetbrains.kotlin.android)
+    android
+    `kotlin-android`
     alias(stack.plugins.serialization)
 }
 

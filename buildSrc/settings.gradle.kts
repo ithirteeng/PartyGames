@@ -1,4 +1,4 @@
-rootProject.name = "PartyGames"
+rootProject.name = "buildSrc"
 
 pluginManagement {
     repositories {
@@ -16,10 +16,6 @@ dependencyResolutionManagement {
         jcenter()
     }
     versionCatalogs {
-        register("stack") { from(files("./gradle/stack.versions.toml")) }
+        register("stack") { from(files("../gradle/stack.versions.toml")) }
     }
 }
-
-apply(from = "common/settings-common.gradle.kts")
-include(":app")
-include(":lib-meshrabiya-local")
