@@ -1,7 +1,7 @@
 plugins {
-    android
+    `android-library`
     `kotlin-android`
-    alias(stack.plugins.serialization)
+    `kotlinx-serialization`
 }
 
 android {

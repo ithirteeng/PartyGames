@@ -1,6 +1,8 @@
 plugins {
     android
     `kotlin-android`
+    `kotlinx-serialization`
+    `kotlin-composecompiler`
 }
 
 android {
@@ -15,6 +17,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
@@ -33,6 +38,17 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
@@ -41,16 +57,9 @@ dependencies {
     implementation(stack.koin.android)
     implementation(stack.koin.androidx.compose)
 
-    //android
-    implementation(stack.androidx.core.ktx)
-    implementation(stack.androidx.lifecycle.runtime.ktx)
-    implementation(stack.androidx.activity.compose)
-    implementation(platform(stack.androidx.compose.bom))
-    implementation(stack.androidx.ui)
-    implementation(stack.androidx.ui.graphics)
-    implementation(stack.androidx.ui.tooling.preview)
-    implementation(stack.androidx.navigation.compose)
-    implementation(stack.androidx.material3)
+    // local
+    implementation(project(":common:ui"))
+    implementation(project(":lib-meshrabiya-local"))
 
     //serialization
     implementation(stack.kotlinx.serialization.json)
@@ -59,5 +68,8 @@ dependencies {
     implementation(stack.androidx.datastore)
     implementation(stack.androidx.datastore.preferences)
 
-    implementation(project(":lib-meshrabiya-local"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

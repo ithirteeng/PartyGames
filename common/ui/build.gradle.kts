@@ -1,5 +1,6 @@
 plugins {
     common.library
+    `kotlin-composecompiler`
 }
 
 android {
@@ -7,11 +8,13 @@ android {
 }
 
 dependencies {
-    implementation(stack.androidx.core.ktx)
-    implementation(stack.androidx.lifecycle.runtime.ktx)
-    implementation(stack.androidx.activity.compose)
-    implementation(platform(stack.androidx.compose.bom))
-    implementation(stack.androidx.ui)
-    implementation(stack.androidx.ui.graphics)
-    implementation(stack.androidx.ui.tooling.preview)
+    api(stack.androidx.core.ktx)
+    api(stack.androidx.lifecycle.runtime.ktx)
+    api(stack.androidx.activity.compose)
+    api(platform(stack.androidx.compose.bom))
+    api(stack.androidx.ui)
+    api(stack.androidx.ui.graphics)
+    api(stack.androidx.ui.tooling.preview)
+    api(stack.androidx.material3)
+    api(stack.android.material)
 }

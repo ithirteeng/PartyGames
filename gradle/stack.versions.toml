@@ -2,6 +2,8 @@
 agp = "8.5.2"
 kotlin = "2.0.21"
 coreKtx = "1.13.1"
+compose = "1.7.0"
+material = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -27,6 +29,7 @@ org-bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on",
 org-bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncycastle" }
 seancfoley-ipaddress = { module = "com.github.seancfoley:ipaddress", version.ref = "ipaddress" }
 
+android-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -53,6 +56,9 @@ androidx-datastore = { group = "androidx.datastore", name = "datastore", version
 # plugins
 android-tools-build = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+jetbrains-compose = { module = "org.jetbrains.compose:org.jetbrains.compose.gradle.plugin", version.ref = "compose" }
+jetbrains-kotlin-compose = { module = "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin", version.ref = "kotlin" }
+jetbrains-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
