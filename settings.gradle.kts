@@ -21,5 +21,6 @@ dependencyResolutionManagement {
 }
 
 apply(from = "common/settings-common.gradle.kts")
+apply(from = "screens/settings-screens.gradle.kts")
 include(":app")
 include(":lib-meshrabiya-local")

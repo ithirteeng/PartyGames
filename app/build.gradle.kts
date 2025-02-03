@@ -57,9 +57,14 @@ dependencies {
     implementation(stack.koin.android)
     implementation(stack.koin.androidx.compose)
 
+    //UI
+    implementation(stack.systemui.controller)
+
     // local
+    implementation(project(":common:architecture"))
     implementation(project(":common:ui"))
     implementation(project(":lib-meshrabiya-local"))
+    implementation(project(":screens:main"))
 
     //serialization
     implementation(stack.kotlinx.serialization.json)

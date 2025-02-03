@@ -24,9 +24,4 @@ android {
             isMinifyEnabled = false
         }
     }
-
-    buildFeatures {
-        compose = true
-        viewBinding = true
-    }
 }
