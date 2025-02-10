@@ -1,12 +1,8 @@
 package com.ith.partygames.screens.main.presentation
 
 import com.ith.partygames.common.architecture.BaseState
+import com.ith.partygames.common.games.GameType
 
-sealed interface MainState: BaseState {
-
-    data object Loading: MainState
-
-    data class Content(
-        val name: String
-    ): MainState
-}
+data class MainState(
+    val games: List<GameType> = GameType.entries
+): BaseState

@@ -1,12 +1,13 @@
 package com.ith.partygames.screens.main.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import com.ith.partygames.common.architecture.BaseViewModel
 
-class MainViewModel: BaseViewModel<MainState, MainEvent>() {
+class MainViewModel(
+    private val savedStateHandle: SavedStateHandle,
+): BaseViewModel<MainState, MainEvent>() {
 
-    override fun initState(): MainState = MainState.Loading
+    override fun initState(): MainState = MainState()
 
-    override fun processEvent(event: MainEvent) {
-        //todo add events
-    }
+    override fun processEvent(event: MainEvent) {}
 }

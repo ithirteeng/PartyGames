@@ -3,10 +3,12 @@ package com.ith.partygames.navigation
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ith.partygames.screens.main.navigation.MainScreen
-import com.ith.partygames.screens.main.presentation.MainScreen
+import androidx.navigation.navOptions
+import com.ith.partygames.screens.common_connection.common.navigation.commonConnectionScreensGraph
+import com.ith.partygames.screens.common_connection.main.navigation.navigateToCommonConnectionMainScreen
+import com.ith.partygames.screens.main.navigation.MainRoute
+import com.ith.partygames.screens.main.navigation.mainScreen
 
 @Composable
 fun PartyGamesNavGraph(
@@ -14,10 +16,17 @@ fun PartyGamesNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = MainScreen
+        startDestination = MainRoute
     ) {
-        composable<MainScreen> {
-            MainScreen()
-        }
+        mainScreen(
+            navigateToCommonConnectionScreen = { gameType ->
+                navController.navigateToCommonConnectionMainScreen(
+                    gameType = gameType,
+                    navOptions = navOptions {  }
+                )
+            }
+        )
+
+        commonConnectionScreensGraph()
     }
 }

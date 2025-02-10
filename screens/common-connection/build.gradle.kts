@@ -3,9 +3,8 @@ plugins {
     `kotlinx-serialization`
     `kotlin-composecompiler`
 }
-
 android {
-    namespace = "com.ith.partygames.screens.main"
+    namespace = "com.ith.partygames.screens.common_connection"
 
     buildFeatures {
         compose = true

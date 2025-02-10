@@ -62,9 +62,13 @@ dependencies {
 
     // local
     implementation(project(":common:architecture"))
+    implementation(project(":common:games"))
     implementation(project(":common:ui"))
     implementation(project(":lib-meshrabiya-local"))
+
     implementation(project(":screens:main"))
+    implementation(project(":screens:common-connection"))
+    implementation(project(":screens:decryptor-game"))
 
     //serialization
     implementation(stack.kotlinx.serialization.json)

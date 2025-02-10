@@ -3,9 +3,8 @@ plugins {
     `kotlinx-serialization`
     `kotlin-composecompiler`
 }
-
 android {
-    namespace = "com.ith.partygames.screens.main"
+    namespace = "com.ith.partygames.screens.decryptor_game"
 
     buildFeatures {
         compose = true
@@ -15,7 +14,6 @@ android {
 dependencies {
     implementation(project(":common:ui"))
     implementation(project(":common:architecture"))
-    implementation(project(":common:games"))
 
     implementation(stack.koin.core)
     implementation(stack.koin.android)

@@ -1,0 +1,3 @@
+package com.ith.partygames.screens.decryptor_game.presentation
+
+class CommonConnectionState
