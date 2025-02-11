@@ -28,15 +28,14 @@ data class LocalHotspotResponse(
             .order(ByteOrder.BIG_ENDIAN)
         byteBuf.putInt(responseToMessageId)
         byteBuf.putInt(errorCode)
-        byteBuf.put(if(config != null) 1.toByte() else 0.toByte())
-        if(config != null) {
+        byteBuf.put(if (config != null) 1.toByte() else 0.toByte())
+        if (config != null) {
             val configOffset = offset + CONFIG_OFFSET
             val configSize = config.toBytes(byteArray, configOffset)
             byteBuf.position(byteBuf.position() + configSize)
         }
         byteBuf.putInt(redirectAddr)
     }
-
 
 
     companion object {
@@ -50,11 +49,11 @@ data class LocalHotspotResponse(
             val responseToMessageId = byteBuf.int
             val errorCode = byteBuf.int
             val hasHotspotConfig = byteBuf.get() != 0.toByte()
-            val config = if(hasHotspotConfig) {
+            val config = if (hasHotspotConfig) {
                 WifiConnectConfig.fromBytes(byteArray, offset + CONFIG_OFFSET).also {
                     byteBuf.position(byteBuf.position() + it.sizeInBytes)
                 }
-            }else {
+            } else {
                 null
             }
             val redirectAddr = byteBuf.int

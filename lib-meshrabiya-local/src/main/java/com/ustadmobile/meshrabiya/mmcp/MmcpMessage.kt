@@ -25,7 +25,13 @@ sealed class MmcpMessage(
         val packetPayload = toBytes()
         val packetData = ByteArray(packetPayload.size + VirtualPacketHeader.HEADER_SIZE)
 
-        System.arraycopy(packetPayload, 0, packetData, VirtualPacketHeader.HEADER_SIZE, packetPayload.size)
+        System.arraycopy(
+            packetPayload,
+            0,
+            packetData,
+            VirtualPacketHeader.HEADER_SIZE,
+            packetPayload.size
+        )
 
         return VirtualPacket.fromHeaderAndPayloadData(
             header = VirtualPacketHeader(
@@ -34,7 +40,7 @@ sealed class MmcpMessage(
                 fromAddr = fromAddr,
                 fromPort = 0,
                 lastHopAddr = lastHopAddr,
-                hopCount =  hopCount,
+                hopCount = hopCount,
                 maxHops = 0,
                 payloadSize = packetPayload.size,
                 deviceName = deviceName
@@ -93,9 +99,9 @@ sealed class MmcpMessage(
         fun fromBytes(
             byteArray: ByteArray,
             offset: Int = 0,
-            len: Int =  byteArray.size,
+            len: Int = byteArray.size,
         ): MmcpMessage {
-            return when(val what = byteArray[offset]) {
+            return when (val what = byteArray[offset]) {
                 WHAT_PING -> MmcpPing.fromBytes(byteArray, offset, len)
                 WHAT_PONG -> MmcpPong.fromBytes(byteArray, offset, len)
                 WHAT_ACK -> MmcpAck.fromBytes(byteArray, offset, len)
@@ -105,7 +111,6 @@ sealed class MmcpMessage(
                 else -> throw IllegalArgumentException("Mmcp: Invalid what: $what")
             }
         }
-
 
 
         fun mmcpHeaderAndPayloadFromBytes(

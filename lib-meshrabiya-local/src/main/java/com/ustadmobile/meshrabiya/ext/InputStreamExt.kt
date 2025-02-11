@@ -21,7 +21,7 @@ fun InputStream.readExactly(b: ByteArray, offset: Int, len: Int): Int {
     var lenRemaining = len
 
     var bytesRead = 0
-    while(lenRemaining > 0 && read(b, currentOffset, lenRemaining).also { bytesRead = it } != -1) {
+    while (lenRemaining > 0 && read(b, currentOffset, lenRemaining).also { bytesRead = it } != -1) {
         currentOffset += bytesRead
         lenRemaining -= bytesRead
     }
@@ -40,7 +40,7 @@ fun InputStream.copyToWithProgressCallback(
     val buf = ByteArray(bufSize)
     var bytesRead: Int
     var totalCopied = 0L
-    while(read(buf).also { bytesRead = it } != -1) {
+    while (read(buf).also { bytesRead = it } != -1) {
         out.write(buf, 0, bytesRead)
         totalCopied += bytesRead
         onProgress?.invoke(totalCopied)
@@ -48,27 +48,29 @@ fun InputStream.copyToWithProgressCallback(
 
     return totalCopied
 }
+
 fun InputStream.readExactlyOrThrow(b: ByteArray, offset: Int, len: Int) {
     val bytesRead = readExactly(b, offset, len)
-    if(bytesRead != len)
+    if (bytesRead != len)
         throw IOException("Read only or throw: could not read $len bytes (read $bytesRead)")
 }
 
 fun InputStream.readByteArrayOfSize(size: Int): ByteArray? {
     val byteArray = ByteArray(size)
     val bytesRead = readExactly(byteArray, 0, size)
-    return if(bytesRead == size)
+    return if (bytesRead == size)
         byteArray
     else
         null
 }
 
-fun InputStream.readyByteArrayOfSizeOrThrow(size: Int) : ByteArray{
+fun InputStream.readyByteArrayOfSizeOrThrow(size: Int): ByteArray {
     return readByteArrayOfSize(size) ?: throw IOException("Could not read requested $size bytes")
 }
 
-fun InputStream.readRemoteAddress() : Int{
-    val addressArray = readByteArrayOfSize(4) ?: throw IOException("readRemoteAddress: Could not read 4 bytes")
+fun InputStream.readRemoteAddress(): Int {
+    val addressArray =
+        readByteArrayOfSize(4) ?: throw IOException("readRemoteAddress: Could not read 4 bytes")
 
     val byteBuffer = ByteBuffer.wrap(addressArray)
     val address = byteBuffer.getInt()
@@ -82,11 +84,11 @@ fun InputStream.readRemoteAddress() : Int{
 fun InputStream.readVirtualPacket(
     buffer: ByteArray,
     offset: Int,
-) : VirtualPacket? {
+): VirtualPacket? {
     //Read header bytes into the buffer
     val headerBytesRead = readExactly(buffer, offset, VirtualPacketHeader.HEADER_SIZE)
 
-    if(headerBytesRead != VirtualPacketHeader.HEADER_SIZE)
+    if (headerBytesRead != VirtualPacketHeader.HEADER_SIZE)
         return null
 
     val packetHeader = VirtualPacketHeader.fromBytes(buffer, offset)
@@ -106,7 +108,7 @@ fun InputStream.readVirtualPacket(
     )
 }
 
-fun InputStream.readChainInitResponse() : ChainSocketInitResponse {
+fun InputStream.readChainInitResponse(): ChainSocketInitResponse {
     return ChainSocketInitResponse.fromBytes(
         readyByteArrayOfSizeOrThrow(ChainSocketInitResponse.MESSAGE_SIZE), 0
     )

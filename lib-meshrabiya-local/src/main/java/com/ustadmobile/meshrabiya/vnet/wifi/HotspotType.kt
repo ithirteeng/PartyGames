@@ -7,12 +7,13 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+
 @Serializable(with = HotspotTypeSerializer::class)
 enum class HotspotType(val flag: Byte) {
     LOCALONLY_HOTSPOT(1), WIFIDIRECT_GROUP(2), AUTO(4);
 
     override fun toString(): String {
-        return when(this) {
+        return when (this) {
             LOCALONLY_HOTSPOT -> "Local Only"
             WIFIDIRECT_GROUP -> "WiFi Direct"
             AUTO -> "Auto"
@@ -32,9 +33,9 @@ enum class HotspotType(val flag: Byte) {
             specifiedType: HotspotType,
             autoType: HotspotType?,
         ): HotspotType? {
-            return if(specifiedType != AUTO) {
+            return if (specifiedType != AUTO) {
                 specifiedType
-            }else {
+            } else {
                 autoType
             }
         }
@@ -42,7 +43,7 @@ enum class HotspotType(val flag: Byte) {
     }
 }
 
-object HotspotTypeSerializer: KSerializer<HotspotType> {
+object HotspotTypeSerializer : KSerializer<HotspotType> {
     override fun deserialize(decoder: Decoder): HotspotType {
         return HotspotType.fromFlag(decoder.decodeByte())
     }

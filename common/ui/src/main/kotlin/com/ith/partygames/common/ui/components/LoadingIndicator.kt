@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun LoadingIndicator(
     modifier: Modifier = Modifier,
-    color: Color,
+    color: Color = Color.Black,
 ) {
     CircularProgressIndicator(
         modifier = modifier,

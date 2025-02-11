@@ -22,11 +22,13 @@ fun PartyGamesNavGraph(
             navigateToCommonConnectionScreen = { gameType ->
                 navController.navigateToCommonConnectionMainScreen(
                     gameType = gameType,
-                    navOptions = navOptions {  }
+                    navOptions = navOptions { }
                 )
             }
         )
 
-        commonConnectionScreensGraph()
+        commonConnectionScreensGraph(
+            navController = navController
+        )
     }
 }

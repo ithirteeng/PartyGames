@@ -43,24 +43,25 @@ class UdpForwardRule(
         DatagramSocket(port)
     },
     private val logger: MNetLogger,
-): Runnable, Closeable {
+) : Runnable, Closeable {
 
     val localPort: Int = boundSocket.localPort
 
-    private val logPrefix: String = "[UdpForwardRule : ${boundSocket.localPort} -> ${destAddress.hostAddress}:$destPort]"
+    private val logPrefix: String =
+        "[UdpForwardRule : ${boundSocket.localPort} -> ${destAddress.hostAddress}:$destPort]"
 
     private inner class ReturnPathDatagramSocket(
         val returnPathSocket: DatagramSocket,
         private val returnToAddress: InetAddress,
         private val returnToPort: Int,
-    ): Runnable {
+    ) : Runnable {
 
         private val returnFuture: Future<*> = ioExecutor.submit(this)
 
         override fun run() {
             val buffer = ByteArray(VirtualPacket.VIRTUAL_PACKET_BUF_SIZE)
 
-            while(!Thread.interrupted()) {
+            while (!Thread.interrupted()) {
                 val packet = DatagramPacket(buffer, 0, buffer.size)
                 returnPathSocket.receive(packet)
                 packet.address = returnToAddress
@@ -83,11 +84,11 @@ class UdpForwardRule(
         try {
             val buffer = ByteArray(VirtualPacket.MAX_PAYLOAD_SIZE)
             logger(Log.DEBUG, "$logPrefix listening", null)
-            while(!Thread.interrupted()) {
+            while (!Thread.interrupted()) {
                 val packet = DatagramPacket(buffer, 0, buffer.size)
                 boundSocket.receive(packet)
 
-                val returnSocket = returnSockets.getOrPut(packet.socketAddress){
+                val returnSocket = returnSockets.getOrPut(packet.socketAddress) {
                     ReturnPathDatagramSocket(
                         returnPathSocket = returnPathSocketFactory.createSocket(destAddress, 0),
                         returnToAddress = packet.address,
@@ -100,9 +101,9 @@ class UdpForwardRule(
 
                 returnSocket.returnPathSocket.send(packet)
             }
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             logger(Log.ERROR, "$logPrefix : exception running", e)
-        }finally {
+        } finally {
 
         }
     }
@@ -116,7 +117,7 @@ class UdpForwardRule(
         }
 
         future.cancel(true)
-        if(closeLocalSocket)
+        if (closeLocalSocket)
             boundSocket.close()
     }
 

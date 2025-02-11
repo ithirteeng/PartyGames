@@ -46,7 +46,7 @@ suspend fun WifiP2pManager.connectAsync(
     channel: Channel?,
     p2pConfig: WifiP2pConfig,
     logPrefix: String? = null
-){
+) {
     val actionListener = WifiP2pActionListenerAdapter(
         onFailLogMessage = "${logPrefix ?: ""} : failed to request connect"
     )
@@ -62,7 +62,7 @@ suspend fun WifiP2pManager.removeServiceRequestAsync(
     logPrefix: String?
 ) {
     val actionListener = WifiP2pActionListenerAdapter(
-        onFailLogMessage ="${logPrefix ?: ""} failed to remove service request"
+        onFailLogMessage = "${logPrefix ?: ""} failed to remove service request"
     )
     removeServiceRequest(channel, request, actionListener)
     actionListener.await()
@@ -163,9 +163,11 @@ fun WifiP2pManager.setWifiP2pChannelsUnhidden(
     operatingChannel: Int,
     actionListener: ActionListener
 ) {
-    val method = this::class.java.getMethod("setWifiP2pChannels",
+    val method = this::class.java.getMethod(
+        "setWifiP2pChannels",
         Channel::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType,
-        ActionListener::class.java)
+        ActionListener::class.java
+    )
     method.invoke(this, channel, listeningChannel, operatingChannel, actionListener)
 }
 
@@ -176,17 +178,24 @@ suspend fun WifiP2pManager.setWifiP2pChannelsAsync(
     operatingChannel: Int,
     logger: MNetLogger?,
 ) {
-    val actionListener = WifiP2pActionListenerAdapter(onFailLogMessage = "Failed to set Wifip2p channels")
-    logger?.invoke(Log.DEBUG, "WifiP2pManager.setWifip2pchannels " +
-            "listening=$listeningChannel, operating=$operatingChannel : start attempt")
+    val actionListener =
+        WifiP2pActionListenerAdapter(onFailLogMessage = "Failed to set Wifip2p channels")
+    logger?.invoke(
+        Log.DEBUG, "WifiP2pManager.setWifip2pchannels " +
+                "listening=$listeningChannel, operating=$operatingChannel : start attempt"
+    )
     try {
         setWifiP2pChannelsUnhidden(channel, listeningChannel, operatingChannel, actionListener)
         actionListener.await()
-        logger?.invoke(Log.DEBUG, "WifiP2pManager.setWifip2pchannels " +
-                "listening=$listeningChannel, operating=$operatingChannel :Success")
-    }catch(e: Exception) {
-        logger?.invoke(Log.ERROR, "WifiP2pManager.setWifip2pchannels " +
-                "listening=$listeningChannel, operating=$operatingChannel : FAILED", e)
+        logger?.invoke(
+            Log.DEBUG, "WifiP2pManager.setWifip2pchannels " +
+                    "listening=$listeningChannel, operating=$operatingChannel :Success"
+        )
+    } catch (e: Exception) {
+        logger?.invoke(
+            Log.ERROR, "WifiP2pManager.setWifip2pchannels " +
+                    "listening=$listeningChannel, operating=$operatingChannel : FAILED", e
+        )
         throw e
     }
 }

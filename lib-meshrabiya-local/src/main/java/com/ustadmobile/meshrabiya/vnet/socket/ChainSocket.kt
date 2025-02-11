@@ -22,14 +22,14 @@ import java.net.SocketAddress
 class ChainSocket(
     private val virtualRouter: VirtualRouter,
     private val logger: MNetLogger,
-): Socket() {
+) : Socket() {
 
     private val logPrefix = "[ChainSocket for ${virtualRouter.address}]"
 
     override fun connect(endpoint: SocketAddress, timeout: Int) {
         val endpointInetAddr = endpoint as? InetSocketAddress
         val address = endpointInetAddr?.address
-        if(
+        if (
             address?.prefixMatches(
                 virtualRouter.networkPrefixLength, virtualRouter.address
             ) == true
@@ -39,8 +39,11 @@ class ChainSocket(
             )
 
             val network = nextHop.network
-            if(network != null) {
-                logger(Log.DEBUG, "$logPrefix binding socket to network $network to connect to $endpoint")
+            if (network != null) {
+                logger(
+                    Log.DEBUG,
+                    "$logPrefix binding socket to network $network to connect to $endpoint"
+                )
                 network.bindSocket(this)
             }
 
@@ -57,13 +60,18 @@ class ChainSocket(
                 )
                 logger(
                     Log.INFO, "$logPrefix created socket to $address:$port " +
-                        "nexthop = ${nextHop.address}:${nextHop.port}")
-            }catch(e: Exception) {
-                logger(Log.ERROR, "$logPrefix Exception connecting to $endpoint " +
-                        "nexthop=${nextHop.address}:${nextHop.port} (finalDest=${nextHop.isFinalDest})", e)
+                            "nexthop = ${nextHop.address}:${nextHop.port}"
+                )
+            } catch (e: Exception) {
+                logger(
+                    Log.ERROR,
+                    "$logPrefix Exception connecting to $endpoint " +
+                            "nexthop=${nextHop.address}:${nextHop.port} (finalDest=${nextHop.isFinalDest})",
+                    e
+                )
                 throw e
             }
-        }else {
+        } else {
             super.connect(endpoint, timeout)
         }
 

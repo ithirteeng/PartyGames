@@ -18,7 +18,7 @@ class MmcpOriginatorMessage(
     val pingTimeSum: Short,
     val connectConfig: WifiConnectConfig?,
     val sentTime: Long = System.currentTimeMillis(),
-): MmcpMessage(WHAT_ORIGINATOR, messageId) {
+) : MmcpMessage(WHAT_ORIGINATOR, messageId) {
     override fun toBytes(): ByteArray {
         val connectConfigSize = connectConfig?.sizeInBytes ?: 0
         //size will be : ping time sum (2 bytes) + sentTime (8 bytes) + connect config size (2 bytes) + connect config
@@ -33,7 +33,7 @@ class MmcpOriginatorMessage(
         return headerAndPayloadToBytes(header, payload)
     }
 
-    fun copyWithPingTimeIncrement(pingTimeIncrement: Short) : MmcpOriginatorMessage{
+    fun copyWithPingTimeIncrement(pingTimeIncrement: Short): MmcpOriginatorMessage {
         return MmcpOriginatorMessage(
             messageId = this.messageId,
             pingTimeSum = (this.pingTimeSum + pingTimeIncrement).toShort(),
@@ -80,7 +80,7 @@ class MmcpOriginatorMessage(
             //The MMCP what byte is always the first byte of an MMCP message -
             // see MmcpHeader.fromBytes
             val what = packet.data[packet.payloadOffset]
-            if(what != WHAT_ORIGINATOR)
+            if (what != WHAT_ORIGINATOR)
                 throw IllegalArgumentException("This is NOT an originator message")
 
             //The offset to the time is the payload offset plus the MMCP header
@@ -101,14 +101,21 @@ class MmcpOriginatorMessage(
             val header = MmcpHeader.fromBytes(byteArray, offset)
 
             val byteBuf = ByteBuffer
-                .wrap(byteArray, offset + MMCP_HEADER_LEN, byteArray.size - (offset + MMCP_HEADER_LEN))
+                .wrap(
+                    byteArray,
+                    offset + MMCP_HEADER_LEN,
+                    byteArray.size - (offset + MMCP_HEADER_LEN)
+                )
                 .order(ByteOrder.BIG_ENDIAN)
             val pingTimeSum = byteBuf.short
             val sentTime = byteBuf.long
             val connectConfigSize = byteBuf.short
-            val connectConfig = if(connectConfigSize > 0) {
-                WifiConnectConfig.fromBytes(byteArray, offset + MMCP_HEADER_LEN + CONNECT_CONFIG_OFFSET)
-            }else {
+            val connectConfig = if (connectConfigSize > 0) {
+                WifiConnectConfig.fromBytes(
+                    byteArray,
+                    offset + MMCP_HEADER_LEN + CONNECT_CONFIG_OFFSET
+                )
+            } else {
                 null
             }
 

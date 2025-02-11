@@ -34,7 +34,7 @@ data class ChainSocketInitRequest(
         fun fromBytes(
             byteArray: ByteArray,
             offset: Int = 0
-        ) : ChainSocketInitRequest {
+        ): ChainSocketInitRequest {
             val byteBuf = ByteBuffer.wrap(byteArray, offset, MESSAGE_SIZE)
                 .order(ByteOrder.BIG_ENDIAN)
             val virtualDestADdr = byteBuf.getInet4Address()

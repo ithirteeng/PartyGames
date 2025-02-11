@@ -6,7 +6,7 @@ import java.io.OutputStream
 
 class BluetoothSocketISocketAdapter(
     private val bluetoothSocket: BluetoothSocket
-): ISocket {
+) : ISocket {
 
     override val inStream: InputStream
         get() = bluetoothSocket.inputStream

@@ -13,13 +13,13 @@ fun Socket.initializeChainIfNotFinalDest(
     chainInitRequest: ChainSocketInitRequest,
     nextHop: ChainSocketNextHop,
 ) {
-    if(!nextHop.isFinalDest) {
+    if (!nextHop.isFinalDest) {
         println("${nextHop.address}:${nextHop.port} is not final destination - write init request and get response")
         getOutputStream().writeChainSocketInitRequest(chainInitRequest)
         val initResponse = getInputStream().readChainInitResponse()
         println("${nextHop.address}:${nextHop.port} got init response")
 
-        if(initResponse.statusCode != 200){
+        if (initResponse.statusCode != 200) {
             throw IOException("Could not init chain socket: status code = ${initResponse.statusCode}")
         }
     }

@@ -9,9 +9,9 @@ import java.util.Enumeration
 inline fun <T, R> Enumeration<T>.firstNotNullOfOrNull(
     transform: (T) -> R?
 ): R? {
-    while(hasMoreElements()) {
+    while (hasMoreElements()) {
         val transformed = transform(nextElement())
-        if(transformed != null)
+        if (transformed != null)
             return transformed
     }
 
@@ -21,9 +21,9 @@ inline fun <T, R> Enumeration<T>.firstNotNullOfOrNull(
 fun <T> Enumeration<T>.firstOrNull(
     predicate: (T) -> Boolean
 ): T? {
-    while(hasMoreElements()) {
+    while (hasMoreElements()) {
         val element = nextElement()
-        if(predicate(element))
+        if (predicate(element))
             return element
     }
 

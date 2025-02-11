@@ -13,13 +13,15 @@ class MmcpAck(
 ) : MmcpMessage(
     what = WHAT_ACK,
     messageId = messageId,
-){
+) {
 
-    override fun toBytes() = headerAndPayloadToBytes(header,
+    override fun toBytes() = headerAndPayloadToBytes(
+        header,
         ByteBuffer.wrap(ByteArray(MESSAGE_SIZE))
             .order(ByteOrder.BIG_ENDIAN)
             .putInt(ackOfMessageId)
-            .array())
+            .array()
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -45,7 +47,7 @@ class MmcpAck(
         fun fromBytes(
             byteArray: ByteArray,
             offset: Int = 0,
-            len: Int =  byteArray.size,
+            len: Int = byteArray.size,
         ): MmcpAck {
             val (header, payload) = mmcpHeaderAndPayloadFromBytes(byteArray, offset, len)
             val ackOfMessageId = ByteBuffer.wrap(payload).int

@@ -3,7 +3,6 @@ package com.ustadmobile.meshrabiya.vnet
 import com.ustadmobile.meshrabiya.ext.findLocalInetAddressForDestinationAddress
 import com.ustadmobile.meshrabiya.ext.prefixMatches
 import com.ustadmobile.meshrabiya.portforward.ReturnPathSocketFactory
-import java.lang.IllegalArgumentException
 import java.net.DatagramSocket
 import java.net.InetAddress
 
@@ -16,20 +15,22 @@ import java.net.InetAddress
  */
 class VirtualNodeReturnPathSocketFactory(
     private val node: VirtualNode,
-): ReturnPathSocketFactory {
+) : ReturnPathSocketFactory {
 
 
     override fun createSocket(destAddress: InetAddress, port: Int): DatagramSocket {
-        return if(
+        return if (
             destAddress.address.prefixMatches(node.networkPrefixLength, node.address.address)
         ) {
             node.createBoundDatagramSocket(0)
-        }else{
+        } else {
             val bindAddress = findLocalInetAddressForDestinationAddress(destAddress)
 
             return bindAddress?.let { DatagramSocket(0, it) }
-                ?: throw IllegalArgumentException("Could not find network interface with subnet " +
-                        "mask for dest address $destAddress")
+                ?: throw IllegalArgumentException(
+                    "Could not find network interface with subnet " +
+                            "mask for dest address $destAddress"
+                )
         }
     }
 

@@ -45,7 +45,7 @@ class LocalOnlyHotspotManager(
 
     private val macAddrPrefKey = stringPreferencesKey("localonly_macaddr")
 
-    private val localOnlyHotspotCallback = object: WifiManager.LocalOnlyHotspotCallback() {
+    private val localOnlyHotspotCallback = object : WifiManager.LocalOnlyHotspotCallback() {
         override fun onStarted(reservation: WifiManager.LocalOnlyHotspotReservation?) {
             logger(Log.DEBUG, "$logPrefix localonlyhotspotcallback: onStarted", null)
             localOnlyHotspotReservation = reservation
@@ -54,7 +54,10 @@ class LocalOnlyHotspotManager(
                 port = router.localDatagramPort,
                 logger = logger,
             )
-            logger(Log.DEBUG, "$logPrefix localonlyhotspotcallback: onstarted: config=$hotspotConfig")
+            logger(
+                Log.DEBUG,
+                "$logPrefix localonlyhotspotcallback: onstarted: config=$hotspotConfig"
+            )
 
             _state.takeIf { reservation != null }?.update { prev ->
                 prev.copy(
@@ -76,8 +79,9 @@ class LocalOnlyHotspotManager(
         }
 
         override fun onFailed(reason: Int) {
-            logger(Log.ERROR, "$logPrefix localOnlyhotspotcallback : onFailed: " +
-                    LocalOnlyHotspotState.errorCodeToString(reason), null
+            logger(
+                Log.ERROR, "$logPrefix localOnlyhotspotcallback : onFailed: " +
+                        LocalOnlyHotspotState.errorCodeToString(reason), null
             )
 
             _state.update { prev ->
@@ -95,21 +99,22 @@ class LocalOnlyHotspotManager(
         preferredBand: ConnectBand,
     ) {
         logger(Log.INFO, "$logPrefix startLocalOnlyHotspot: band=$preferredBand")
-        if(Build.VERSION.SDK_INT >= 33) {
+        if (Build.VERSION.SDK_INT >= 33) {
             val macAddr = dataStore.data.map {
                 it[macAddrPrefKey]
-            }.first()?.let { MacAddress.fromString(it) } ?: MacAddressUtils.createRandomUnicastAddress().also { newMac ->
-                dataStore.edit {
-                    it[macAddrPrefKey] = newMac.toString()
+            }.first()?.let { MacAddress.fromString(it) }
+                ?: MacAddressUtils.createRandomUnicastAddress().also { newMac ->
+                    dataStore.edit {
+                        it[macAddrPrefKey] = newMac.toString()
+                    }
                 }
-            }
 
             val config = UnhiddenSoftApConfigurationBuilder()
                 .setAutoshutdownEnabled(false)
                 .apply {
-                    if(preferredBand == ConnectBand.BAND_5GHZ) {
+                    if (preferredBand == ConnectBand.BAND_5GHZ) {
                         setBand(ScanResult.WIFI_BAND_5_GHZ)
-                    }else if(preferredBand == ConnectBand.BAND_2GHZ) {
+                    } else if (preferredBand == ConnectBand.BAND_2GHZ) {
                         setBand(ScanResult.WIFI_BAND_24_GHZ)
                     }
                 }
@@ -129,7 +134,7 @@ class LocalOnlyHotspotManager(
             wifiManager.startLocalOnlyHotspotWithConfig(config, null, localOnlyHotspotCallback)
             logger(Log.INFO, "$logPrefix startLocalOnlyHotspot: request submitted")
             _state.filter { it.status.isSettled() }.first()
-        }else {
+        } else {
             _state.update { prev ->
                 prev.copy(
                     status = HotspotStatus.STARTING
@@ -145,16 +150,16 @@ class LocalOnlyHotspotManager(
     ) {
         logger(Log.DEBUG, "$logPrefix stopLocalOnlyHotspot")
         val prevState = _state.getAndUpdate { prev ->
-            if(prev.status == HotspotStatus.STARTED) {
+            if (prev.status == HotspotStatus.STARTED) {
                 prev.copy(status = HotspotStatus.STOPPING)
-            }else {
+            } else {
                 prev
             }
         }
 
-        if(prevState.status == HotspotStatus.STARTED) {
+        if (prevState.status == HotspotStatus.STARTED) {
             val reservationVal = localOnlyHotspotReservation
-            if(reservationVal != null) {
+            if (reservationVal != null) {
                 try {
                     logger(Log.DEBUG, "$logPrefix stopLocalOnlyHotspot - closing reservation")
                     reservationVal.close()
@@ -164,7 +169,7 @@ class LocalOnlyHotspotManager(
                         config = null,
                         error = 0,
                     )
-                }catch(e: Exception) {
+                } catch (e: Exception) {
                     logger(Log.ERROR, "$logPrefix : exception closing reservation", e)
                     _state.update { prev ->
                         prev.copy(
@@ -173,14 +178,20 @@ class LocalOnlyHotspotManager(
                     }
                 }
 
-            }else {
-                logger(Log.ERROR, "$logPrefix: stopLocalOnlyhotspot - status was started but reservation is null!")
+            } else {
+                logger(
+                    Log.ERROR,
+                    "$logPrefix: stopLocalOnlyhotspot - status was started but reservation is null!"
+                )
             }
-        }else {
-            logger(Log.DEBUG, "$logPrefix: stopLocalOnlyhotspot: nothing to do - status is ${prevState.status}")
+        } else {
+            logger(
+                Log.DEBUG,
+                "$logPrefix: stopLocalOnlyhotspot: nothing to do - status is ${prevState.status}"
+            )
         }
 
-        if(waitForStop) {
+        if (waitForStop) {
             logger(Log.DEBUG, "$logPrefix: stopLocalOnlyhotspot: waiting for stop to complete")
             _state.filter {
                 it.status == HotspotStatus.STOPPED

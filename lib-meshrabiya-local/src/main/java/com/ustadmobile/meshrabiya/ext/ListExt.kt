@@ -5,12 +5,12 @@ inline fun <T> List<T>.appendOrReplace(
     replace: (T) -> Boolean
 ): List<T> {
     val indexOfItemToReplace = indexOfFirst(replace)
-    return if(indexOfItemToReplace == -1) {
+    return if (indexOfItemToReplace == -1) {
         buildList {
             addAll(this@appendOrReplace)
             add(item)
         }
-    }else {
+    } else {
         toMutableList().also {
             it[indexOfItemToReplace] = item
         }
@@ -18,7 +18,7 @@ inline fun <T> List<T>.appendOrReplace(
 }
 
 fun <T> List<T>.trimIfExceeds(numItems: Int): List<T> {
-    return if(size > numItems)
+    return if (size > numItems)
         subList(0, numItems)
     else
         this

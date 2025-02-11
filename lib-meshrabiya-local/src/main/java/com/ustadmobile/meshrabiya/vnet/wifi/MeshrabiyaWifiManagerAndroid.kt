@@ -94,13 +94,14 @@ class MeshrabiyaWifiManagerAndroid(
     )
 ) : Closeable, MeshrabiyaWifiManager {
 
-    private val logPrefix = "[MeshrabiyaWifiManagerAndroid: ${localNodeAddr.addressToDotNotation()}] "
+    private val logPrefix =
+        "[MeshrabiyaWifiManagerAndroid: ${localNodeAddr.addressToDotNotation()}] "
 
     private val nodeScope = CoroutineScope(Dispatchers.Main + Job())
 
     private inner class ConnectNetworkCallback(
         private val config: WifiConnectConfig
-    ): NetworkCallback() {
+    ) : NetworkCallback() {
         override fun onAvailable(network: Network) {
             logger(Log.DEBUG, "$logPrefix connectToHotspot: connection available. Network=$network")
             _state.update { prev ->
@@ -115,8 +116,12 @@ class MeshrabiyaWifiManagerAndroid(
             nodeScope.launch {
                 try {
                     createStationNetworkBoundSockets(network, config)
-                }catch(e: Exception) {
-                    logger(Log.ERROR, "$logPrefix ConnectNetworkCallback: Exception creating station sockets", e)
+                } catch (e: Exception) {
+                    logger(
+                        Log.ERROR,
+                        "$logPrefix ConnectNetworkCallback: Exception creating station sockets",
+                        e
+                    )
                 }
             }
         }
@@ -154,13 +159,15 @@ class MeshrabiyaWifiManagerAndroid(
 
     private val wifiManager: WifiManager = appContext.getSystemService(WifiManager::class.java)
 
-    private val _state = MutableStateFlow(MeshrabiyaWifiState(
-        concurrentApStationSupported = if(Build.VERSION.SDK_INT >= 30) {
-            wifiManager.isStaApConcurrencySupported
-        }else {
-            false
-        }
-    ))
+    private val _state = MutableStateFlow(
+        MeshrabiyaWifiState(
+            concurrentApStationSupported = if (Build.VERSION.SDK_INT >= 30) {
+                wifiManager.isStaApConcurrencySupported
+            } else {
+                false
+            }
+        )
+    )
 
     override val state: Flow<MeshrabiyaWifiState> = _state.asStateFlow()
 
@@ -170,7 +177,8 @@ class MeshrabiyaWifiManagerAndroid(
      * versions of Android from disconnecting when it realizes the connection has no Internet
      * (e.g. Android will see activity on the network).
      */
-    private val stationBoundSockets = AtomicReference<Pair<VirtualNodeDatagramSocket, ChainSocketServer>?>()
+    private val stationBoundSockets =
+        AtomicReference<Pair<VirtualNodeDatagramSocket, ChainSocketServer>?>()
 
     private val closed = AtomicBoolean(false)
 
@@ -183,20 +191,21 @@ class MeshrabiyaWifiManagerAndroid(
             // Do nothing - in future may need to stop other WiFi stuff
         }
 
-        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "meshrabiya").also {
-            it.acquire()
-        }
+        wifiLock =
+            wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "meshrabiya").also {
+                it.acquire()
+            }
 
         nodeScope.launch {
             wifiDirectManager.state.collect {
                 _state.update { prev ->
                     prev.copy(
                         wifiDirectState = it,
-                        wifiRole = if(it.config != null) {
+                        wifiRole = if (it.config != null) {
                             WifiRole.WIFI_DIRECT_GROUP_OWNER
-                        }else if(prev.wifiRole == WifiRole.WIFI_DIRECT_GROUP_OWNER) {
+                        } else if (prev.wifiRole == WifiRole.WIFI_DIRECT_GROUP_OWNER) {
                             WifiRole.NONE
-                        }else {
+                        } else {
                             prev.wifiRole
                         }
                     )
@@ -217,7 +226,7 @@ class MeshrabiyaWifiManagerAndroid(
     }
 
     private fun assertNotClosed() {
-        if(closed.get())
+        if (closed.get())
             throw IllegalStateException("$logPrefix is closed!")
     }
 
@@ -247,7 +256,7 @@ class MeshrabiyaWifiManagerAndroid(
         val spotTypeCreated = withContext(Dispatchers.Main) {
 
             val prevState = _state.getAndUpdate { prev ->
-                when(prev.hotspotTypeToCreate?.overrideWithRequestTypeIfSpecified()) {
+                when (prev.hotspotTypeToCreate?.overrideWithRequestTypeIfSpecified()) {
                     HotspotType.WIFIDIRECT_GROUP -> prev.copy(
                         wifiDirectState = prev.wifiDirectState.copy(
                             hotspotStatus = HotspotStatus.STARTING
@@ -258,15 +267,17 @@ class MeshrabiyaWifiManagerAndroid(
                 }
             }
 
-            when(prevState.hotspotTypeToCreate?.overrideWithRequestTypeIfSpecified()) {
+            when (prevState.hotspotTypeToCreate?.overrideWithRequestTypeIfSpecified()) {
                 HotspotType.WIFIDIRECT_GROUP -> {
                     localOnlyHotspotManager.stopLocalOnlyHotspot(waitForStop = true)
                     wifiDirectManager.startWifiDirectGroup(request.preferredBand)
                 }
+
                 HotspotType.LOCALONLY_HOTSPOT -> {
                     wifiDirectManager.stopWifiDirectGroup()
                     localOnlyHotspotManager.startLocalOnlyHotspot(request.preferredBand)
                 }
+
                 else -> {
                     //Do nothing
                 }
@@ -301,13 +312,14 @@ class MeshrabiyaWifiManagerAndroid(
     private suspend fun connectToHotspotInternal(
         config: WifiConnectConfig,
     ): Network {
-        logger(Log.INFO,
+        logger(
+            Log.INFO,
             "$logPrefix Connecting to hotspot: ssid=${config.ssid} passphrase=${config.passphrase} bssid=${config.bssid}"
         )
 
         val networkCallback = ConnectNetworkCallback(config)
 
-        val networkRequest = if(Build.VERSION.SDK_INT >= 29) {
+        val networkRequest = if (Build.VERSION.SDK_INT >= 29) {
             //Use the suggestion API as per https://developer.android.com/guide/topics/connectivity/wifi-bootstrap
             /*
              * Dialog behavior notes
@@ -328,7 +340,7 @@ class MeshrabiyaWifiManagerAndroid(
             val specifier = WifiNetworkSpecifier.Builder()
                 .apply {
                     setSsid(config.ssid)
-                    if(bssid != null)
+                    if (bssid != null)
                         setBssid(MacAddress.fromString(bssid))
 
                     //Normally it would be nice to set the band here to speed up connection (avoid
@@ -347,10 +359,10 @@ class MeshrabiyaWifiManagerAndroid(
 
                 .setNetworkSpecifier(specifier)
                 .build()
-        }else {
+        } else {
             //use pre-Android 10 WifiManager API
             val wifiConfig = WifiConfiguration().apply {
-                SSID =  "\"${config.ssid}\""
+                SSID = "\"${config.ssid}\""
                 preSharedKey = "\"${config.passphrase}\""
 
                 /* Setting hiddenSSID = true is necessary, even though the network we are connecting
@@ -364,11 +376,19 @@ class MeshrabiyaWifiManagerAndroid(
             }
             val configNetworkId = wifiManager.addOrLookupNetwork(wifiConfig, logger)
             val currentlyConnectedNetworkId = wifiManager.connectionInfo.networkId
-            logger(Log.DEBUG, "$logPrefix connectToHotspot: Currently connected to networkId: $currentlyConnectedNetworkId", null)
+            logger(
+                Log.DEBUG,
+                "$logPrefix connectToHotspot: Currently connected to networkId: $currentlyConnectedNetworkId",
+                null
+            )
 
-            if(currentlyConnectedNetworkId == configNetworkId) {
-                logger(Log.DEBUG, "$logPrefix connectToHotspot: Already connected to target networkid", null)
-            }else {
+            if (currentlyConnectedNetworkId == configNetworkId) {
+                logger(
+                    Log.DEBUG,
+                    "$logPrefix connectToHotspot: Already connected to target networkid",
+                    null
+                )
+            } else {
                 //If currently connected to another network, we need to disconnect.
                 wifiManager.takeIf { currentlyConnectedNetworkId != -1 }?.disconnect()
                 wifiManager.enableNetwork(configNetworkId, true)
@@ -380,7 +400,11 @@ class MeshrabiyaWifiManagerAndroid(
                 .build()
         }
 
-        logger(Log.DEBUG, "$logPrefix connectToHotspot: requesting network for ${config.ssid}", null)
+        logger(
+            Log.DEBUG,
+            "$logPrefix connectToHotspot: requesting network for ${config.ssid}",
+            null
+        )
         val prevRequest = connectRequest.getAndUpdate {
             config to networkCallback
         }
@@ -408,10 +432,16 @@ class MeshrabiyaWifiManagerAndroid(
         }.first()
 
         if (resultState.network != null) {
-            logger(Log.INFO, "$logPrefix connectToHotspot: ${config.ssid} - success status=${resultState.status}")
+            logger(
+                Log.INFO,
+                "$logPrefix connectToHotspot: ${config.ssid} - success status=${resultState.status}"
+            )
             return resultState.network
-        }else {
-            logger(Log.ERROR, "$logPrefix connectToHotspot: ${config.ssid} - fail status=${resultState.status}")
+        } else {
+            logger(
+                Log.ERROR,
+                "$logPrefix connectToHotspot: ${config.ssid} - fail status=${resultState.status}"
+            )
             throw WifiConnectException("ConnectToHotspot: ${config.ssid} status=${resultState.status} network=null")
         }
     }
@@ -420,7 +450,7 @@ class MeshrabiyaWifiManagerAndroid(
         config: WifiConnectConfig,
         timeout: Long,
     ) {
-        if(config.band == ConnectBand.BAND_5GHZ && !wifiManager.is5GHzBandSupported) {
+        if (config.band == ConnectBand.BAND_5GHZ && !wifiManager.is5GHzBandSupported) {
             throw WifiConnectException("ERROR: 5Ghz not supported by device: ${config.ssid} uses 5Ghz band")
         }
 
@@ -432,7 +462,7 @@ class MeshrabiyaWifiManagerAndroid(
             }.first()
             val stationStatus = resultState.wifiStationState.status
 
-            if(stationStatus in WifiStationState.Status.FAIL_STATES) {
+            if (stationStatus in WifiStationState.Status.FAIL_STATES) {
                 throw WifiConnectException("Attempted to connect to ${config.ssid}, status=$stationStatus")
             }
         }
@@ -444,18 +474,18 @@ class MeshrabiyaWifiManagerAndroid(
      */
     suspend fun disconnectStation() {
         val prevState = _state.getAndUpdate { prev ->
-            if(prev.wifiStationState.status != WifiStationState.Status.INACTIVE) {
+            if (prev.wifiStationState.status != WifiStationState.Status.INACTIVE) {
                 prev.copy(
                     wifiStationState = prev.wifiStationState.copy(
                         status = WifiStationState.Status.INACTIVE,
                     )
                 )
-            }else {
+            } else {
                 prev
             }
         }
 
-        if(prevState.wifiStationState.status != WifiStationState.Status.INACTIVE) {
+        if (prevState.wifiStationState.status != WifiStationState.Status.INACTIVE) {
             val prevNetworkCallback = connectRequest.getAndUpdate {
                 null
             }
@@ -472,7 +502,7 @@ class MeshrabiyaWifiManagerAndroid(
                         logger(Log.DEBUG, "$logPrefix : disconnectStation: closed sockets")
                     }
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 logger(Log.WARN, "$logPrefix : disconnectionStation: exception closing sockets", e)
             }
 
@@ -481,8 +511,11 @@ class MeshrabiyaWifiManagerAndroid(
                     connectivityManager.unregisterNetworkCallback(it)
                     logger(Log.DEBUG, "$logPrefix unregistered network request callback")
                 }
-            }catch(e: Exception) {
-                logger(Log.WARN, "$logPrefix disconnectStation: exception unregistering network callback")
+            } catch (e: Exception) {
+                logger(
+                    Log.WARN,
+                    "$logPrefix disconnectStation: exception unregistering network callback"
+                )
             }
 
             _state.update { prev ->
@@ -499,17 +532,21 @@ class MeshrabiyaWifiManagerAndroid(
     }
 
     private suspend fun createBoundSocket(
-        port: Int, bindAddress:
+        port: Int,
+        bindAddress:
         InetAddress?,
         maxAttempts: Int,
         interval: Long = 200,
     ): DatagramSocket {
-        for(i in 0 until maxAttempts) {
+        for (i in 0 until maxAttempts) {
             try {
                 return DatagramSocket(port, bindAddress).also {
-                    logger(Log.DEBUG, "$logPrefix : createBoundSocket: success after ${i+1} attempts")
+                    logger(
+                        Log.DEBUG,
+                        "$logPrefix : createBoundSocket: success after ${i + 1} attempts"
+                    )
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 delay(interval)
             }
         }
@@ -527,25 +564,33 @@ class MeshrabiyaWifiManagerAndroid(
      * (without user intervention). On Android 10+ because the connection required user approval,
      * this behavior does not seem to be as prevalent.
      */
-    private suspend fun createStationNetworkBoundSockets(network: Network, config: WifiConnectConfig) {
+    private suspend fun createStationNetworkBoundSockets(
+        network: Network,
+        config: WifiConnectConfig
+    ) {
         withContext(Dispatchers.IO) {
             val linkProperties = connectivityManager
                 .getLinkProperties(network)
             val networkInterface = NetworkInterface.getByName(linkProperties?.interfaceName)
 
             val interfaceInet6Addrs = networkInterface.inetAddresses.toList()
-            logger(Log.INFO, "$logPrefix : connectToHotspot - addrs = ${interfaceInet6Addrs.joinToString()}")
+            logger(
+                Log.INFO,
+                "$logPrefix : connectToHotspot - addrs = ${interfaceInet6Addrs.joinToString()}"
+            )
 
             val netAddress = networkInterface.inetAddresses.firstOrNull {
                 it is Inet6Address && it.isLinkLocalAddress
             }
 
-            logger(Log.INFO, "$logPrefix : connectToHotspot: Got link local address = " +
-                    "$netAddress on interface ${linkProperties?.interfaceName}", null)
+            logger(
+                Log.INFO, "$logPrefix : connectToHotspot: Got link local address = " +
+                        "$netAddress on interface ${linkProperties?.interfaceName}", null
+            )
 
             val socketPort = findFreePort(0)
 
-            val socket = if(config.hotspotType == HotspotType.WIFIDIRECT_GROUP) {
+            val socket = if (config.hotspotType == HotspotType.WIFIDIRECT_GROUP) {
                 /**
                  * When using a Wifi Direct group we MUST use the LinkLocal IPv6 address to the
                  * IPv4 conflict issue - where all WiFi Direct group owners are assigned 192.168.49.1
@@ -561,15 +606,19 @@ class MeshrabiyaWifiManagerAndroid(
                  */
                 try {
                     createBoundSocket(socketPort, netAddress, 10).also {
-                        logger(Log.DEBUG, "$logPrefix : createStationNetworkBoundSockets : succeeded on retry")
+                        logger(
+                            Log.DEBUG,
+                            "$logPrefix : createStationNetworkBoundSockets : succeeded on retry"
+                        )
                     }
-                }catch(e: IOException) {
-                    logger(Log.ERROR, "$logPrefix : createStationNetworkBoundSockets : " +
-                            "Exception trying to create bound sockets. Cannot continue", e
+                } catch (e: IOException) {
+                    logger(
+                        Log.ERROR, "$logPrefix : createStationNetworkBoundSockets : " +
+                                "Exception trying to create bound sockets. Cannot continue", e
                     )
                     throw e
                 }
-            }else {
+            } else {
                 /**
                  * LocalOnlyHotspot IP address ranges are randomized and do not appear to suffer from
                  * this issue.
@@ -604,12 +653,16 @@ class MeshrabiyaWifiManagerAndroid(
             previousSockets?.first?.close()
             previousSockets?.second?.close(true)
 
-            logger(Log.INFO, "$logPrefix : addWifiConnection:Created network bound port on ${networkBoundDatagramSocket.localPort}", null)
+            logger(
+                Log.INFO,
+                "$logPrefix : addWifiConnection:Created network bound port on ${networkBoundDatagramSocket.localPort}",
+                null
+            )
             _state.update { prev ->
                 prev.copy(
-                    wifiRole = if(config.hotspotType == HotspotType.LOCALONLY_HOTSPOT) {
+                    wifiRole = if (config.hotspotType == HotspotType.LOCALONLY_HOTSPOT) {
                         WifiRole.WIFI_DIRECT_GROUP_OWNER
-                    }else {
+                    } else {
                         WifiRole.CLIENT
                     },
                     wifiStationState = prev.wifiStationState.copy(
@@ -620,17 +673,23 @@ class MeshrabiyaWifiManagerAndroid(
             }
 
             val peerAddr = config.linkLocalAddr?.let {
-                logger(Log.DEBUG,
+                logger(
+                    Log.DEBUG,
                     "$logPrefix : createStationBoundSockets: determining peer address using " +
-                            "linkLocalAddr supplied in config")
+                            "linkLocalAddr supplied in config"
+                )
                 Inet6Address.getByAddress(it.requireHostAddress(), it.address, networkInterface)
-            } ?: if(Build.VERSION.SDK_INT >= 30) {
-                logger(Log.DEBUG, "$logPrefix - createStationBoundSockets : determining peer " +
-                        "address using linkProperties.dhcpServerAddress")
+            } ?: if (Build.VERSION.SDK_INT >= 30) {
+                logger(
+                    Log.DEBUG, "$logPrefix - createStationBoundSockets : determining peer " +
+                            "address using linkProperties.dhcpServerAddress"
+                )
                 linkProperties?.dhcpServerAddress
-            }else {
-                logger(Log.DEBUG, "$logPrefix - createStationBoundSockets : determining peer " +
-                        "address using wifimanager.dhcpInfo")
+            } else {
+                logger(
+                    Log.DEBUG, "$logPrefix - createStationBoundSockets : determining peer " +
+                            "address using wifimanager.dhcpInfo"
+                )
                 @Suppress("DEPRECATION") //Must use deprecated property to support PRE-SDK30
                 wifiManager.dhcpInfo?.serverAddress?.let {
                     //Strangely - seems like these are Little Endian
@@ -643,22 +702,28 @@ class MeshrabiyaWifiManagerAndroid(
                 }
             }
 
-            logger(Log.DEBUG, "$logPrefix : addWifiConnectionConnect: Peer address is: $peerAddr", null)
+            logger(
+                Log.DEBUG,
+                "$logPrefix : addWifiConnectionConnect: Peer address is: $peerAddr",
+                null
+            )
 
-            if(peerAddr != null) {
+            if (peerAddr != null) {
                 //Once connected,
-                onNewWifiConnectionListener.onNewWifiConnection(WifiConnectEvent(
-                    neighborPort = config.port,
-                    neighborInetAddress = peerAddr,
-                    socket = networkBoundDatagramSocket,
-                    neighborVirtualAddress = config.nodeVirtualAddr,
-                ))
+                onNewWifiConnectionListener.onNewWifiConnection(
+                    WifiConnectEvent(
+                        neighborPort = config.port,
+                        neighborInetAddress = peerAddr,
+                        socket = networkBoundDatagramSocket,
+                        neighborVirtualAddress = config.nodeVirtualAddr,
+                    )
+                )
             }
         }
     }
 
     override fun close() {
-        if(!closed.getAndSet(true)) {
+        if (!closed.getAndSet(true)) {
             nodeScope.cancel()
             wifiDirectManager.close()
             wifiLock?.also {
@@ -667,24 +732,33 @@ class MeshrabiyaWifiManagerAndroid(
         }
     }
 
-    suspend fun lookupStoredBssid(ssid: String) : String? {
+    suspend fun lookupStoredBssid(ssid: String): String? {
         val prefKey = stringPreferencesKey("${PREFIX_SSID}$ssid")
 
         return appContext.bssidDataStore.data.map {
             it[prefKey]
         }.first().also {
-            logger(Log.DEBUG, "MeshrabiyaWifiManagerAndroid: lookupStoredBssid ssid=$ssid bssid=$it")
+            logger(
+                Log.DEBUG,
+                "MeshrabiyaWifiManagerAndroid: lookupStoredBssid ssid=$ssid bssid=$it"
+            )
         }
 
     }
 
     suspend fun storeBssidForAddress(ssid: String, bssid: String) {
-        logger(Log.DEBUG, "MeshrabiyaWifiManagerAndroid: storeBssidForAddress ssid=$ssid bssid=$bssid")
+        logger(
+            Log.DEBUG,
+            "MeshrabiyaWifiManagerAndroid: storeBssidForAddress ssid=$ssid bssid=$bssid"
+        )
         val prefKey = stringPreferencesKey("${PREFIX_SSID}$ssid")
         appContext.bssidDataStore.edit {
             it[prefKey] = bssid
         }
-        logger(Log.DEBUG, "MeshrabiyaWifiManagerAndroid: storeBssidForAddress ssid=$ssid bssid=$bssid : Done")
+        logger(
+            Log.DEBUG,
+            "MeshrabiyaWifiManagerAndroid: storeBssidForAddress ssid=$ssid bssid=$bssid : Done"
+        )
     }
 
     companion object {

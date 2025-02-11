@@ -7,14 +7,13 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.util.Log
 import com.ustadmobile.meshrabiya.MeshrabiyaConstants.LOG_TAG
-import com.ustadmobile.meshrabiya.log.MNetLoggerStdout
 import com.ustadmobile.meshrabiya.log.MNetLogger
+import com.ustadmobile.meshrabiya.log.MNetLoggerStdout
 import com.ustadmobile.meshrabiya.vnet.bluetooth.VirtualNodeGattServer
 import rawhttp.core.RawHttp
 import rawhttp.core.RawHttpRequest
 import rawhttp.core.RawHttpResponse
 import java.io.IOException
-import java.lang.Exception
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -47,14 +46,14 @@ abstract class AbstractHttpOverBluetoothServer(
     private val onUuidAllocatedListener = OnUuidAllocatedListener { uuid ->
         val serverSocket: BluetoothServerSocket? = try {
             bluetoothAdapter?.listenUsingInsecureRfcommWithServiceRecord("ustad", uuid)
-        }catch(e: SecurityException) {
+        } catch (e: SecurityException) {
             null
         }
 
         val clientSocket: BluetoothSocket? = try {
             Log.d(LOG_TAG, "Listening for data request on $uuid")
             serverSocket?.accept(SOCKET_ACCEPT_TIMEOUT) //Can add timeout here
-        }catch (e: IOException) {
+        } catch (e: IOException) {
             Log.e(LOG_TAG, "Exception accepting socket", e)
             null
         }
@@ -64,13 +63,13 @@ abstract class AbstractHttpOverBluetoothServer(
             try {
                 val inStream = socket.inputStream
                 val outStream = socket.outputStream
-                while(isStarted.get()) {
+                while (isStarted.get()) {
                     val request = rawHttp.parseRequest(inStream)
                     val response = handleRequest(socket.remoteDevice.address, request)
                     response.writeTo(outStream)
                     outStream.flush()
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.w(LOG_TAG, "Exception handling socket $uuid", e)
             } finally {
                 Log.d(LOG_TAG, "Closing server socket on $uuid")
@@ -93,7 +92,7 @@ abstract class AbstractHttpOverBluetoothServer(
     }
 
     fun start() {
-        if(isClosed.get())
+        if (isClosed.get())
             throw IllegalStateException("HttpOverBluetoothServer is closed.")
         isStarted.set(true)
         uuidAllocationServer.start()
@@ -105,7 +104,7 @@ abstract class AbstractHttpOverBluetoothServer(
     }
 
     fun close() {
-        if(!isClosed.getAndSet(true)) {
+        if (!isClosed.getAndSet(true)) {
             Log.d(LOG_TAG, "Closing BluetoothOverHttpServer")
             uuidAllocationServer.close()
         }

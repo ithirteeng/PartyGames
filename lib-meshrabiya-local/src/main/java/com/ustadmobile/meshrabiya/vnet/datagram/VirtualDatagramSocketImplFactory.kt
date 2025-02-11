@@ -6,7 +6,7 @@ import java.net.DatagramSocketImplFactory
 
 class VirtualDatagramSocketImplFactory(
     private val node: VirtualNode,
-): DatagramSocketImplFactory {
+) : DatagramSocketImplFactory {
 
     override fun createDatagramSocketImpl(): DatagramSocketImpl {
 

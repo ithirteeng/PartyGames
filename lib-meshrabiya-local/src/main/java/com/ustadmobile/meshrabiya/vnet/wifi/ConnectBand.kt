@@ -15,7 +15,7 @@ enum class ConnectBand(val flag: Byte) {
     ;
 
     override fun toString(): String {
-        return when(this) {
+        return when (this) {
             BAND_2GHZ -> "2Ghz"
             BAND_5GHZ -> "5Ghz"
             BAND_UNKNOWN -> "Band unknown"
@@ -30,7 +30,7 @@ enum class ConnectBand(val flag: Byte) {
     }
 }
 
-object ConnectBandSerializer: KSerializer<ConnectBand> {
+object ConnectBandSerializer : KSerializer<ConnectBand> {
     override fun deserialize(decoder: Decoder): ConnectBand {
         return ConnectBand.fromFlag(decoder.decodeByte())
     }

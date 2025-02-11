@@ -9,7 +9,6 @@ import android.util.Log
 import com.ustadmobile.meshrabiya.log.MNetLogger
 
 
-
 @SuppressLint("MissingPermission") //Permissions will be set by the app, not the library
 fun WifiManager.addOrLookupNetwork(
     config: WifiConfiguration,

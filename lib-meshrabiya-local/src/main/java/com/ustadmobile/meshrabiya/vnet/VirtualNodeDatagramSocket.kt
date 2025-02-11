@@ -2,8 +2,8 @@ package com.ustadmobile.meshrabiya.vnet
 
 import android.net.Network
 import android.util.Log
-import com.ustadmobile.meshrabiya.log.MNetLogger
 import com.ustadmobile.meshrabiya.ext.addressToDotNotation
+import com.ustadmobile.meshrabiya.log.MNetLogger
 import java.io.Closeable
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -33,7 +33,7 @@ class VirtualNodeDatagramSocket(
     private val logger: MNetLogger,
     name: String? = null,
     val boundNetwork: Network? = null,
-):  Runnable, Closeable {
+) : Runnable, Closeable {
 
     private val future: Future<*>
 
@@ -44,7 +44,7 @@ class VirtualNodeDatagramSocket(
     init {
         logPrefix = buildString {
             append("[VirtualNodeDatagramSocket for ${localNodeVirtualAddress.addressToDotNotation()} ")
-            if(name != null)
+            if (name != null)
                 append("- $name")
             append("] ")
         }
@@ -53,9 +53,13 @@ class VirtualNodeDatagramSocket(
 
     override fun run() {
         val buffer = ByteArray(VirtualPacket.MAX_PAYLOAD_SIZE)
-        logger(Log.DEBUG, "$logPrefix Started on ${socket.localPort} waiting for first packet", null)
+        logger(
+            Log.DEBUG,
+            "$logPrefix Started on ${socket.localPort} waiting for first packet",
+            null
+        )
 
-        while(!Thread.interrupted() && !socket.isClosed) {
+        while (!Thread.interrupted() && !socket.isClosed) {
             try {
                 val rxPacket = DatagramPacket(buffer, 0, buffer.size)
                 socket.receive(rxPacket)
@@ -66,8 +70,8 @@ class VirtualNodeDatagramSocket(
                     datagramPacket = rxPacket,
                     virtualNodeDatagramSocket = this,
                 )
-            }catch(e: Exception) {
-                if(!socket.isClosed)
+            } catch (e: Exception) {
+                if (!socket.isClosed)
                     logger(Log.WARN, "$logPrefix : run : exception handling packet", e)
             }
         }

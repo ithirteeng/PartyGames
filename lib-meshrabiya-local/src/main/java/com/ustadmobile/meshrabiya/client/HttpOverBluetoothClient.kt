@@ -14,7 +14,6 @@ import rawhttp.core.RawHttp
 import rawhttp.core.RawHttpRequest
 import rawhttp.core.body.StringBody
 import java.util.UUID
-import kotlin.Exception
 
 /**
  * As per https://developer.android.com/guide/topics/connectivity/bluetooth/connect-bluetooth-devices#connect-server
@@ -47,7 +46,7 @@ class HttpOverBluetoothClient(
         statusCode: Int,
         responseLine: String,
         text: String,
-    ) : BluetoothHttpResponse {
+    ): BluetoothHttpResponse {
         return BluetoothHttpResponse(
             response = rawHttp.parseResponse(
                 "HTTP/1.1 $statusCode $responseLine\n" +
@@ -83,20 +82,24 @@ class HttpOverBluetoothClient(
         remoteAddress: String,
         uuidMask: UUID,
         request: RawHttpRequest
-    ) : BluetoothHttpResponse {
+    ): BluetoothHttpResponse {
         val adapter = bluetoothAdapter ?: return newInternalErrorResponse("No bluetooth adapter")
-        if(!adapter.isEnabled)
-            return newTextResponse(statusCode = 503, responseLine = "Service Unavailable",
-                text = "Bluetooth not enabled")
+        if (!adapter.isEnabled)
+            return newTextResponse(
+                statusCode = 503, responseLine = "Service Unavailable",
+                text = "Bluetooth not enabled"
+            )
 
         val dataUuid = uuidAllocationClient.requestUuidAllocation(
             remoteAddress = remoteAddress,
             uuidMask = uuidMask,
         )
 
-        if(dataUuid == UUID_BUSY) {
-            return newTextResponse(503, "Service Unavailable",
-                "Server UUID port not allocated: busy")
+        if (dataUuid == UUID_BUSY) {
+            return newTextResponse(
+                503, "Service Unavailable",
+                "Server UUID port not allocated: busy"
+            )
         }
 
         val remoteDevice = adapter.getRemoteDevice(remoteAddress)
@@ -110,14 +113,20 @@ class HttpOverBluetoothClient(
                 ) ?: throw IllegalStateException()
                 Log.d(LOG_TAG, "Connecting to server on $dataUuid")
                 socket.connect()
-                Log.d(LOG_TAG, "Socket connected on $dataUuid : sending request ${request.method} ${request.uri}")
+                Log.d(
+                    LOG_TAG,
+                    "Socket connected on $dataUuid : sending request ${request.method} ${request.uri}"
+                )
 
                 //inStream and outStream will be closed when the underlying socket is closed.
                 val inStream = socket.inputStream
                 val outStream = socket.outputStream
                 request.writeTo(outStream)
                 val httpResponse = rawHttp.parseResponse(inStream)
-                Log.d(LOG_TAG, "Received response: ${httpResponse.statusCode} ${httpResponse.startLine.reason}")
+                Log.d(
+                    LOG_TAG,
+                    "Received response: ${httpResponse.statusCode} ${httpResponse.startLine.reason}"
+                )
 
                 return@withContext BluetoothHttpResponse(
                     response = httpResponse,
@@ -127,11 +136,11 @@ class HttpOverBluetoothClient(
                         Log.d(LOG_TAG, "Closed response/socket for $dataUuid")
                     }
                 )
-            }catch(e: SecurityException) {
+            } catch (e: SecurityException) {
                 e.printStackTrace()
                 socket?.close()
                 return@withContext newInternalErrorResponse(e.toString())
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 socket?.close()
                 return@withContext newInternalErrorResponse(e.toString())

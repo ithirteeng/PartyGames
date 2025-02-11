@@ -14,7 +14,6 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import java.lang.IllegalStateException
 import java.net.Inet6Address
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -74,7 +73,8 @@ data class WifiConnectConfig(
      *
      */
     val sizeInBytes: Int
-        get() = 4 + (4 + (ssidBytes?.size ?: 0) ) + (4 + (passphraseBytes?.size ?: 0)) + 4 + 1 + 1 + 1 + 1 + 16
+        get() = 4 + (4 + (ssidBytes?.size ?: 0)) + (4 + (passphraseBytes?.size
+            ?: 0)) + 4 + 1 + 1 + 1 + 1 + 16
 
     /**
      * We need to provide the BSSID when connecting on Android 10+ to avoid a dialog on
@@ -106,7 +106,7 @@ data class WifiConnectConfig(
         byteArray: ByteArray,
         offset: Int,
     ): Int {
-        if(linkLocalAddr != null && linkLocalAddr.address.size != 16)
+        if (linkLocalAddr != null && linkLocalAddr.address.size != 16)
             throw IllegalStateException("Inet6Address is not 16 bytes!")
 
         ByteBuffer.wrap(byteArray, offset, sizeInBytes)
@@ -151,9 +151,9 @@ data class WifiConnectConfig(
             val connectBand = ConnectBand.fromFlag(byteBuf.get())
             val persistenceType = HotspotPersistenceType.fromFlag(byteBuf.get())
             val hasLinkLocalAddr = byteBuf.getBoolean()
-            val linkLocalAddr = if(hasLinkLocalAddr) {
+            val linkLocalAddr = if (hasLinkLocalAddr) {
                 Inet6Address.getByAddress(ByteArray(16).also { byteBuf.get(it) }) as Inet6Address
-            }else {
+            } else {
                 null
             }
 
@@ -174,7 +174,7 @@ data class WifiConnectConfig(
 
 }
 
-object Inet6AddressSerializer: KSerializer<Inet6Address> {
+object Inet6AddressSerializer : KSerializer<Inet6Address> {
 
     override val descriptor: SerialDescriptor
         get() = PrimitiveSerialDescriptor("Inet6Address", PrimitiveKind.STRING)

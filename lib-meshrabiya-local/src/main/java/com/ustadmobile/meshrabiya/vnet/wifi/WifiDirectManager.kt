@@ -65,7 +65,7 @@ class WifiDirectManager(
     private val dataStore: DataStore<Preferences>,
     private val json: Json,
     private val ioExecutorService: ExecutorService,
-): WifiP2pManager.ChannelListener, Closeable  {
+) : WifiP2pManager.ChannelListener, Closeable {
 
     fun interface OnBeforeGroupStart {
         suspend fun onBeforeGroupStart()
@@ -83,9 +83,10 @@ class WifiDirectManager(
 
     private val nodeScope: CoroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
-    private val dnsSdTxtRecordListener = WifiP2pManager.DnsSdTxtRecordListener { fullDomainName, txtRecordMap, wifiP2pDevice ->
-        //Do nothing
-    }
+    private val dnsSdTxtRecordListener =
+        WifiP2pManager.DnsSdTxtRecordListener { fullDomainName, txtRecordMap, wifiP2pDevice ->
+            //Do nothing
+        }
 
     private val dnsSdResponseFlow = MutableSharedFlow<DnsSdResponse>(
         replay = 1,
@@ -99,19 +100,24 @@ class WifiDirectManager(
     @RequiresApi(29)
     suspend fun getOrCreateWifiGroupFromPrefs(): WifiConnectConfig {
         val existingConfig = dataStore.data.map {
-           it[dataStoreConfigKey]
+            it[dataStoreConfigKey]
         }.first()?.let {
             json.decodeFromString(WifiConnectConfig.serializer(), it)
         }
 
-        if(existingConfig != null) {
+        if (existingConfig != null) {
             return existingConfig
         }
 
         //BSSID will be persistent as long as the ssid stays the same but cannot be set directly.
         val newGroupConfig = WifiConnectConfig(
             nodeVirtualAddr = localNodeAddr,
-            ssid = "DIRECT-${randomString(length = 2, charPool = WIFIDIRECT_TWO_LETTER_CHARPOOL)}-${localNodeAddr}",
+            ssid = "DIRECT-${
+                randomString(
+                    length = 2,
+                    charPool = WIFIDIRECT_TWO_LETTER_CHARPOOL
+                )
+            }-${localNodeAddr}",
             passphrase = randomString(length = 10),
             port = router.localDatagramPort,
             hotspotType = HotspotType.WIFIDIRECT_GROUP,
@@ -128,9 +134,9 @@ class WifiDirectManager(
         return newGroupConfig
     }
 
-    private val wifiDirectBroadcastReceiver = object: BroadcastReceiver() {
+    private val wifiDirectBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            when(intent.action) {
+            when (intent.action) {
                 WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION -> {
                     val state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1)
                     logger(
@@ -139,13 +145,14 @@ class WifiDirectManager(
                     )
 
                     //If Wifi has been disabled, make sure to
-                    _state.takeIf { state == WifiP2pManager.WIFI_P2P_STATE_DISABLED }?.update { prev ->
-                        prev.copy(
-                            hotspotStatus = HotspotStatus.STOPPED,
-                            error = 0,
-                            config = null,
-                        )
-                    }
+                    _state.takeIf { state == WifiP2pManager.WIFI_P2P_STATE_DISABLED }
+                        ?.update { prev ->
+                            prev.copy(
+                                hotspotStatus = HotspotStatus.STOPPED,
+                                error = 0,
+                                config = null,
+                            )
+                        }
 
                 }
 
@@ -154,8 +161,13 @@ class WifiDirectManager(
                  * if the group already exists when the app starts.
                  */
                 WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION -> {
-                    val extraGroup: WifiP2pGroup? = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP)
-                    logger(Log.DEBUG, "wifi p2p connection changed action: group=${extraGroup?.toPrettyString()}", null)
+                    val extraGroup: WifiP2pGroup? =
+                        intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP)
+                    logger(
+                        Log.DEBUG,
+                        "wifi p2p connection changed action: group=${extraGroup?.toPrettyString()}",
+                        null
+                    )
                     onNewWifiP2pGroupInfoReceived(extraGroup)
                 }
             }
@@ -180,11 +192,15 @@ class WifiDirectManager(
 
         val linkLocalAddr = linkInterface?.inetAddresses?.toList()
             ?.firstOrNull { it.isLinkLocalAddress && it is Inet6Address } as? Inet6Address
-        logger(Log.INFO, "$logPrefix : onNewWifiP2pGroupInfoReceived : Found link local addr = $linkLocalAddr", null)
+        logger(
+            Log.INFO,
+            "$logPrefix : onNewWifiP2pGroupInfoReceived : Found link local addr = $linkLocalAddr",
+            null
+        )
 
         nodeScope.launch {
             groupUpdateMutex.withLock {
-                val hotspotConfig = if(ssid != null && passphrase != null &&
+                val hotspotConfig = if (ssid != null && passphrase != null &&
                     linkLocalAddr != null
                 ) {
                     WifiConnectConfig(
@@ -194,21 +210,21 @@ class WifiDirectManager(
                         band = group.connectBand,
                         port = router.localDatagramPort,
                         linkLocalAddr = linkLocalAddr.withoutScope(),
-                        persistenceType = if(Build.VERSION.SDK_INT >= 29) {
+                        persistenceType = if (Build.VERSION.SDK_INT >= 29) {
                             HotspotPersistenceType.FULL
                         } else {
                             HotspotPersistenceType.NONE
                         },
                         hotspotType = HotspotType.WIFIDIRECT_GROUP
                     )
-                }else {
+                } else {
                     null
                 }
 
-                _state.update {prev ->
+                _state.update { prev ->
                     prev.copy(
                         config = hotspotConfig,
-                        hotspotStatus = if(hotspotConfig != null) {
+                        hotspotStatus = if (hotspotConfig != null) {
                             HotspotStatus.STARTED
                         } else {
                             HotspotStatus.STOPPED
@@ -220,14 +236,20 @@ class WifiDirectManager(
     }
 
 
-    private val dnsSdResponseListener = WifiP2pManager.DnsSdServiceResponseListener { instanceName, registrationType, device ->
-        logger(Log.DEBUG, "DNS SD Service Response: instance=$instanceName device=${device.deviceAddress}", null)
-        dnsSdResponseFlow.tryEmit(DnsSdResponse(instanceName, registrationType, device))
-    }
+    private val dnsSdResponseListener =
+        WifiP2pManager.DnsSdServiceResponseListener { instanceName, registrationType, device ->
+            logger(
+                Log.DEBUG,
+                "DNS SD Service Response: instance=$instanceName device=${device.deviceAddress}",
+                null
+            )
+            dnsSdResponseFlow.tryEmit(DnsSdResponse(instanceName, registrationType, device))
+        }
 
-    private val wifiP2pGroupInfoListener = WifiP2pManager.GroupInfoListener { group: WifiP2pGroup? ->
-        logger(Log.DEBUG, "P2P Group Info Available: ${group?.toPrettyString()} ", null)
-    }
+    private val wifiP2pGroupInfoListener =
+        WifiP2pManager.GroupInfoListener { group: WifiP2pGroup? ->
+            logger(Log.DEBUG, "P2P Group Info Available: ${group?.toPrettyString()} ", null)
+        }
 
 
     var channel: WifiP2pManager.Channel? = null
@@ -250,7 +272,7 @@ class WifiDirectManager(
         nodeScope.launch {
             initWifiDirectChannel()
             val existingGroupInfo = wifiP2pManager?.requestGroupInfoAsync(channel)
-            if(existingGroupInfo != null) {
+            if (existingGroupInfo != null) {
                 logger(
                     Log.DEBUG,
                     "$logPrefix: init: Group already exists on startup: ${existingGroupInfo.toPrettyString()}",
@@ -283,10 +305,14 @@ class WifiDirectManager(
     }
 
 
-    private fun initWifiDirectChannel(){
-        if(channel == null) {
+    private fun initWifiDirectChannel() {
+        if (channel == null) {
             channel = wifiP2pManager?.initialize(appContext, Looper.getMainLooper(), this)
-            wifiP2pManager?.setDnsSdResponseListeners(channel, dnsSdResponseListener, dnsSdTxtRecordListener)
+            wifiP2pManager?.setDnsSdResponseListeners(
+                channel,
+                dnsSdResponseListener,
+                dnsSdTxtRecordListener
+            )
             logger(Log.DEBUG, "$logPrefix WifiP2pChannel initialized", null)
         }
     }
@@ -295,18 +321,31 @@ class WifiDirectManager(
     private suspend fun addWifiDirectService() {
         val servInfo = makeWifiP2pServiceInfo(localNodeAddr)
 
-        logger(Log.DEBUG, "$logPrefix addWifiDirectService instance=${localNodeAddr.encodeAsHex()}", null)
+        logger(
+            Log.DEBUG,
+            "$logPrefix addWifiDirectService instance=${localNodeAddr.encodeAsHex()}",
+            null
+        )
         val completable = CompletableDeferred<Boolean>()
 
-        wifiP2pManager?.addLocalService(channel, servInfo, object: WifiP2pManager.ActionListener {
+        wifiP2pManager?.addLocalService(channel, servInfo, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
                 logger(Log.DEBUG, "$logPrefix addWifiDirectService: success", null)
                 completable.complete(true)
             }
 
             override fun onFailure(reason: Int) {
-                logger(Log.ERROR, "$logPrefix addWifiDirectService: failed ${WifiDirectError(reason)}", null)
-                completable.completeExceptionally(WifiDirectException("Failed to add service", reason))
+                logger(
+                    Log.ERROR,
+                    "$logPrefix addWifiDirectService: failed ${WifiDirectError(reason)}",
+                    null
+                )
+                completable.completeExceptionally(
+                    WifiDirectException(
+                        "Failed to add service",
+                        reason
+                    )
+                )
             }
         })
 
@@ -324,39 +363,44 @@ class WifiDirectManager(
 
         //check if group already exists - e.g. the group might have started before the app
         val existingGroupInfo = wifiP2pManager?.requestGroupInfoAsync(channel)
-        if(existingGroupInfo != null){
+        if (existingGroupInfo != null) {
             logger(
                 Log.DEBUG,
                 "$logPrefix: startWifiDirectGroup: Group already exists: ${existingGroupInfo.toPrettyString()}",
-            null
+                null
             )
             onNewWifiP2pGroupInfoReceived(existingGroupInfo)
-        }else {
+        } else {
             logger(Log.DEBUG, "$logPrefix startWifiDirectGroup: Requesting WifiP2PGroup", null)
             try {
                 _state.update { prev ->
                     prev.copy(hotspotStatus = HotspotStatus.STARTING)
                 }
 
-                if(Build.VERSION.SDK_INT >= 29) {
+                if (Build.VERSION.SDK_INT >= 29) {
                     val config = getOrCreateWifiGroupFromPrefs()
                     val p2pConfig = WifiP2pConfig.Builder()
                         .enablePersistentMode(true)
                         .setNetworkName(config.ssid)
                         .apply {
-                            if(preferredBand == ConnectBand.BAND_5GHZ) {
+                            if (preferredBand == ConnectBand.BAND_5GHZ) {
                                 setGroupOperatingBand(WifiP2pConfig.GROUP_OWNER_BAND_5GHZ)
-                            }else if(preferredBand == ConnectBand.BAND_2GHZ){
+                            } else if (preferredBand == ConnectBand.BAND_2GHZ) {
                                 setGroupOperatingBand(WifiP2pConfig.GROUP_OWNER_BAND_2GHZ)
                             }
                         }
                         .setPassphrase(config.passphrase)
                         .build()
-                    val channelVal = channel ?: throw IllegalStateException("Create group: Null channel!")
-                    logger(Log.DEBUG, "$logPrefix startWifiDirectGroup: Create WifiDirect Group with preferences bssid = " +
-                            "${p2pConfig.deviceAddress} networkname = ${config.ssid}", null)
+                    val channelVal =
+                        channel ?: throw IllegalStateException("Create group: Null channel!")
+                    logger(
+                        Log.DEBUG,
+                        "$logPrefix startWifiDirectGroup: Create WifiDirect Group with preferences bssid = " +
+                                "${p2pConfig.deviceAddress} networkname = ${config.ssid}",
+                        null
+                    )
                     wifiP2pManager?.createGroupAsync(channelVal, p2pConfig, logPrefix, logger)
-                }else {
+                } else {
                     wifiP2pManager?.createGroupAsync(
                         channel, "$logPrefix startWifiDirectGroup ", logger
                     )
@@ -364,7 +408,7 @@ class WifiDirectManager(
 
                 // Can wait for the BroadcastReceiver WIFI_P2P_STATE_CHANGED_ACTION to pickup
                 // the new group info via state flow
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 logger(Log.ERROR, "Exception creating group", e)
                 _state.update { prev ->
                     prev.copy(
@@ -380,7 +424,7 @@ class WifiDirectManager(
             state.filter { it.hotspotStatus == HotspotStatus.STARTED || it.error != 0 }.first()
         }?.hotspotStatus == HotspotStatus.STARTED
 
-        if(groupStartedOk)
+        if (groupStartedOk)
             addWifiDirectService()
 
         return groupStartedOk
@@ -389,23 +433,27 @@ class WifiDirectManager(
 
     suspend fun stopWifiDirectGroup(): Boolean {
         logger(Log.DEBUG, "$logPrefix stopWifiDirectGroup", null)
-        if(
+        if (
         //Use atomic update on state flow. If group was started, then stop it now.
             _state.getAndUpdate { prev ->
-                if(prev.hotspotStatus == HotspotStatus.STARTED) {
+                if (prev.hotspotStatus == HotspotStatus.STARTED) {
                     prev.copy(
                         hotspotStatus = HotspotStatus.STOPPING
                     )
-                }else {
+                } else {
                     prev
                 }
             }.hotspotStatus == HotspotStatus.STARTED
         ) {
             withContext(Dispatchers.Main) {
                 val channelVal = channel
-                if(channelVal != null) {
+                if (channelVal != null) {
                     try {
-                        logger(Log.DEBUG, "$logPrefix stopWifiDirectGroup - requesting group removal",null)
+                        logger(
+                            Log.DEBUG,
+                            "$logPrefix stopWifiDirectGroup - requesting group removal",
+                            null
+                        )
                         wifiP2pManager?.removeGroupAsync(channelVal, logger, logPrefix)
                         logger(Log.INFO, "$logPrefix stopWifiDirectGroup: successful", null)
                         _state.update { prev ->
@@ -416,26 +464,40 @@ class WifiDirectManager(
                             )
                         }
 
-                        if(Build.VERSION.SDK_INT >= 27) {
-                            logger(Log.DEBUG, "$logPrefix stopWifiDirectGroup: closing wifi p2p channel")
+                        if (Build.VERSION.SDK_INT >= 27) {
+                            logger(
+                                Log.DEBUG,
+                                "$logPrefix stopWifiDirectGroup: closing wifi p2p channel"
+                            )
                             channelVal.close()
                         }
 
                         channel = null
-                    }catch(e: Exception) {
-                        logger(Log.WARN, "$logPrefix: Exception attempting to stop wifi direct group", e)
+                    } catch (e: Exception) {
+                        logger(
+                            Log.WARN,
+                            "$logPrefix: Exception attempting to stop wifi direct group",
+                            e
+                        )
                         _state.update { prev ->
                             prev.copy(
                                 error = (e as? WifiDirectException)?.wifiDirectFailReason ?: -1
                             )
                         }
                     }
-                }else {
-                    logger(Log.ERROR, "INVALID STATE: wifidirect group status = STARTED but channel is null")
+                } else {
+                    logger(
+                        Log.ERROR,
+                        "INVALID STATE: wifidirect group status = STARTED but channel is null"
+                    )
                 }
             }
-        }else {
-            logger(Log.DEBUG, "$logPrefix stopWifiDirectGroup - nothing to do - status is already stopped", null)
+        } else {
+            logger(
+                Log.DEBUG,
+                "$logPrefix stopWifiDirectGroup - nothing to do - status is already stopped",
+                null
+            )
         }
 
         return withTimeoutOrNull(MeshrabiyaWifiManagerAndroid.HOTSPOT_TIMEOUT) {
@@ -444,8 +506,8 @@ class WifiDirectManager(
     }
 
     override fun close() {
-        if(!closed.getAndSet(true)) {
-            if(Build.VERSION.SDK_INT >= 27) {
+        if (!closed.getAndSet(true)) {
+            if (Build.VERSION.SDK_INT >= 27) {
                 //Channel close is only allowed on SDK27+
                 channel?.close()
             }

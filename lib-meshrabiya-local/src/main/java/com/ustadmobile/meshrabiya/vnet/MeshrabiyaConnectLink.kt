@@ -1,12 +1,12 @@
 package com.ustadmobile.meshrabiya.vnet
 
 import com.ustadmobile.meshrabiya.ext.addressToDotNotation
+import com.ustadmobile.meshrabiya.ext.requireAddressAsInt
 import com.ustadmobile.meshrabiya.vnet.bluetooth.MeshrabiyaBluetoothState
 import com.ustadmobile.meshrabiya.vnet.wifi.WifiConnectConfig
 import kotlinx.serialization.json.Json
 import java.net.InetAddress
 import java.net.URLDecoder
-import com.ustadmobile.meshrabiya.ext.requireAddressAsInt
 import java.net.URLEncoder
 
 /**
@@ -31,26 +31,30 @@ data class MeshrabiyaConnectLink(
             hotspotConfig: WifiConnectConfig?,
             bluetoothConfig: MeshrabiyaBluetoothState?,
             json: Json,
-        ) : MeshrabiyaConnectLink {
+        ): MeshrabiyaConnectLink {
             val uri = buildString {
                 append("$PROTO_PREFIX${nodeAddr.addressToDotNotation()}:$port/?")
-                if(hotspotConfig != null) {
+                if (hotspotConfig != null) {
                     append("hotspot=")
                     append(
-                        URLEncoder.encode(json.encodeToString(
-                            WifiConnectConfig.serializer(), hotspotConfig
-                        ), "UTF-8")
+                        URLEncoder.encode(
+                            json.encodeToString(
+                                WifiConnectConfig.serializer(), hotspotConfig
+                            ), "UTF-8"
+                        )
                     )
                 }
-                if(hotspotConfig != null && bluetoothConfig != null) {
+                if (hotspotConfig != null && bluetoothConfig != null) {
                     append("&")
                 }
-                if(bluetoothConfig != null) {
+                if (bluetoothConfig != null) {
                     append("bluetooth=")
                     append(
-                        URLEncoder.encode(json.encodeToString(
-                            MeshrabiyaBluetoothState.serializer(), bluetoothConfig
-                        ), "UTF-8")
+                        URLEncoder.encode(
+                            json.encodeToString(
+                                MeshrabiyaBluetoothState.serializer(), bluetoothConfig
+                            ), "UTF-8"
+                        )
                     )
                 }
             }
@@ -68,7 +72,7 @@ data class MeshrabiyaConnectLink(
             json: Json = Json,
         ): MeshrabiyaConnectLink {
             val uriLowerCase = uri.lowercase()
-            if(!uriLowerCase.startsWith(PROTO_PREFIX))
+            if (!uriLowerCase.startsWith(PROTO_PREFIX))
                 throw IllegalArgumentException("Meshrabiya connect url must start with $PROTO://")
 
             val addr = uri.substringAfter(PROTO_PREFIX).substringBefore(":")

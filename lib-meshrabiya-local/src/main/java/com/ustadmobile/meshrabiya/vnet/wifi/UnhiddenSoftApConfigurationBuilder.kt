@@ -20,21 +20,21 @@ class UnhiddenSoftApConfigurationBuilder {
 
     private val builderInstance = builderClass.newInstance()
 
-    fun setBand(band: Int) : UnhiddenSoftApConfigurationBuilder {
+    fun setBand(band: Int): UnhiddenSoftApConfigurationBuilder {
         builderClass.getMethod("setBand", Int::class.javaPrimitiveType).invoke(
             builderInstance, band
         )
         return this
     }
 
-    fun setAutoshutdownEnabled(enabled: Boolean) : UnhiddenSoftApConfigurationBuilder  {
+    fun setAutoshutdownEnabled(enabled: Boolean): UnhiddenSoftApConfigurationBuilder {
         builderClass.getMethod("setAutoShutdownEnabled", Boolean::class.javaPrimitiveType).invoke(
             builderInstance, enabled
         )
         return this
     }
 
-    fun setPassphrase(passphrase: String, securityType: Int) : UnhiddenSoftApConfigurationBuilder  {
+    fun setPassphrase(passphrase: String, securityType: Int): UnhiddenSoftApConfigurationBuilder {
         builderClass.getMethod(
             "setPassphrase", String::class.java, Int::class.javaPrimitiveType
         ).invoke(
@@ -44,21 +44,21 @@ class UnhiddenSoftApConfigurationBuilder {
         return this
     }
 
-    fun setBssid(macAddress: MacAddress) : UnhiddenSoftApConfigurationBuilder {
+    fun setBssid(macAddress: MacAddress): UnhiddenSoftApConfigurationBuilder {
         builderClass.getMethod("setBssid", MacAddress::class.java).invoke(
             builderInstance, macAddress
         )
         return this
     }
 
-    fun setMacRandomizationSetting(randomizationSetting: Int): UnhiddenSoftApConfigurationBuilder  {
+    fun setMacRandomizationSetting(randomizationSetting: Int): UnhiddenSoftApConfigurationBuilder {
         builderClass.getMethod("setMacRandomizationSetting", Int::class.java).invoke(
             builderInstance, randomizationSetting
         )
         return this
     }
 
-    fun setSsid(ssid: String) : UnhiddenSoftApConfigurationBuilder {
+    fun setSsid(ssid: String): UnhiddenSoftApConfigurationBuilder {
         builderClass.getMethod("setSsid", String::class.java).invoke(
             builderInstance, ssid
         )

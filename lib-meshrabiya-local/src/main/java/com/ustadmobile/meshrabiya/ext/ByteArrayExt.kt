@@ -5,7 +5,7 @@ import java.nio.ByteOrder
 import kotlin.experimental.and
 import kotlin.math.min as mathMin
 
-fun ByteArray.ip4AddressToInt() : Int{
+fun ByteArray.ip4AddressToInt(): Int {
     return ByteBuffer.wrap(this).order(ByteOrder.BIG_ENDIAN).int
 }
 
@@ -21,23 +21,23 @@ fun ByteArray.ip4AddressToInt() : Int{
 fun ByteArray.prefixMatches(
     networkPrefixLength: Int,
     otherAddress: ByteArray
-) : Boolean {
+): Boolean {
     var bitsCompared = 0
     var bitsToCompare = 0
 
     var index = 0
-    var mask : Byte
-    while(bitsCompared < networkPrefixLength) {
-        bitsToCompare = mathMin(8, networkPrefixLength -  bitsCompared)
+    var mask: Byte
+    while (bitsCompared < networkPrefixLength) {
+        bitsToCompare = mathMin(8, networkPrefixLength - bitsCompared)
 
-        if(bitsToCompare == 8) {
-            if(this[index] != otherAddress[index])
+        if (bitsToCompare == 8) {
+            if (this[index] != otherAddress[index])
                 return false
-        }else {
-            for(b in 0 until bitsToCompare) {
+        } else {
+            for (b in 0 until bitsToCompare) {
                 mask = 1.shl(b).toByte()
 
-                if(this[index].and(mask) != otherAddress[index].and(mask))
+                if (this[index].and(mask) != otherAddress[index].and(mask))
                     return false
             }
         }

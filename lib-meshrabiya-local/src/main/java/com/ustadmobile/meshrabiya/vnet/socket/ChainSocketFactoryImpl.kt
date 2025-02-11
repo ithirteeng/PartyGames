@@ -21,13 +21,13 @@ class ChainSocketFactoryImpl(
         port: Int,
         localAddress: InetAddress? = null,
         localPort: Int? = null
-    ) : ChainSocketResult {
+    ): ChainSocketResult {
         try {
             val nextHop = virtualRouter.lookupNextHopForChainSocket(address, port)
             val socketFactory = nextHop.network?.socketFactory ?: systemSocketFactory
-            val socket = if(localAddress != null && localPort != null) {
+            val socket = if (localAddress != null && localPort != null) {
                 socketFactory.createSocket(nextHop.address, nextHop.port, localAddress, localPort)
-            }else {
+            } else {
                 socketFactory.createSocket(nextHop.address, nextHop.port)
             }
 
@@ -40,10 +40,12 @@ class ChainSocketFactoryImpl(
                 nextHop
             )
 
-            logger(Log.INFO, "$logPrefix created socket to $address:$port " +
-                    "nexthop = ${nextHop.address}:${nextHop.port}")
+            logger(
+                Log.INFO, "$logPrefix created socket to $address:$port " +
+                        "nexthop = ${nextHop.address}:${nextHop.port}"
+            )
             return ChainSocketResult(socket, nextHop)
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             logger(Log.ERROR, "$logPrefix exception creating socket", e)
             throw e
         }
@@ -55,34 +57,44 @@ class ChainSocketFactoryImpl(
 
     override fun createSocket(host: String, port: Int): Socket {
         val address = InetAddress.getByName(host)
-        return if(address.isVirtualAddress()) {
+        return if (address.isVirtualAddress()) {
             createSocketForVirtualAddress(address, port).socket
-        }else {
+        } else {
             systemSocketFactory.createSocket(host, port)
         }
     }
 
-    override fun createSocket(host: String, port: Int, localAddress: InetAddress, localPort: Int): Socket {
+    override fun createSocket(
+        host: String,
+        port: Int,
+        localAddress: InetAddress,
+        localPort: Int
+    ): Socket {
         val address = InetAddress.getByName(host)
-        return if(address.isVirtualAddress()) {
+        return if (address.isVirtualAddress()) {
             createSocketForVirtualAddress(address, port, localAddress, localPort).socket
-        }else {
+        } else {
             systemSocketFactory.createSocket(host, port, localAddress, localPort)
         }
     }
 
     override fun createSocket(address: InetAddress, port: Int): Socket {
-        return if(address.isVirtualAddress()) {
+        return if (address.isVirtualAddress()) {
             createSocketForVirtualAddress(address, port).socket
-        }else {
+        } else {
             systemSocketFactory.createSocket(address, port)
         }
     }
 
-    override fun createSocket(address: InetAddress, port: Int, localAddress: InetAddress, localPort: Int): Socket {
-        return if(address.isVirtualAddress()) {
+    override fun createSocket(
+        address: InetAddress,
+        port: Int,
+        localAddress: InetAddress,
+        localPort: Int
+    ): Socket {
+        return if (address.isVirtualAddress()) {
             createSocketForVirtualAddress(address, port, localAddress, localPort).socket
-        }else {
+        } else {
             systemSocketFactory.createSocket(address, port, localAddress, localPort)
         }
     }

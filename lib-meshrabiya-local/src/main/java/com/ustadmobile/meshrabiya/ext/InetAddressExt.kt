@@ -6,13 +6,13 @@ import java.net.NetworkInterface
 
 fun InetAddress.requireAddressAsInt(): Int {
     val addrData = address
-    if(addrData.size != 4)
+    if (addrData.size != 4)
         throw IllegalArgumentException("requireAddressAsInt: not 32-bit address")
 
     return addrData.ip4AddressToInt()
 }
 
-fun InetAddress.requireAsIpv6() : Inet6Address {
+fun InetAddress.requireAsIpv6(): Inet6Address {
     return this as? Inet6Address ?: throw IllegalStateException("$this not an ipv6 address")
 }
 
@@ -21,7 +21,7 @@ fun unspecifiedIpv6Address() = Inet6Address.getByName("::").requireAsIpv6()
 fun InetAddress.prefixMatches(
     networkPrefixLength: Int,
     other: InetAddress
-) : Boolean {
+): Boolean {
     return address.prefixMatches(networkPrefixLength, other.address)
 }
 
@@ -35,14 +35,15 @@ fun InetAddress.prefixMatches(
  */
 fun findLocalInetAddressForDestinationAddress(
     destAddress: InetAddress
-) : InetAddress? {
+): InetAddress? {
     return NetworkInterface.getNetworkInterfaces().firstNotNullOfOrNull { netInterface ->
         netInterface.interfaceAddresses.firstNotNullOfOrNull { interfaceAddress ->
-            if(interfaceAddress.address.prefixMatches(
-                    interfaceAddress.networkPrefixLength.toInt(), destAddress)
+            if (interfaceAddress.address.prefixMatches(
+                    interfaceAddress.networkPrefixLength.toInt(), destAddress
+                )
             ) {
                 interfaceAddress.address
-            }else {
+            } else {
                 null
             }
         }

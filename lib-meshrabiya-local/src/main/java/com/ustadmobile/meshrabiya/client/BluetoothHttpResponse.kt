@@ -10,7 +10,7 @@ import java.io.Closeable
 class BluetoothHttpResponse(
     val response: RawHttpResponse<*>,
     internal val onClose: () -> Unit,
-) : Closeable{
+) : Closeable {
 
     override fun close() {
         onClose()

@@ -40,7 +40,6 @@ object MacAddressUtils {
     private const val ETHER_ADDR_LEN = 6
 
 
-
     @RequiresApi(28)
     fun createRandomUnicastAddress(): MacAddress {
         return createRandomUnicastAddress(null, SecureRandom())

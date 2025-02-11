@@ -6,6 +6,6 @@ android {
     namespace = "com.ith.partygames.common.architecture"
 }
 
-dependencies  {
+dependencies {
     api(stack.androidx.lifecycle.viewmodel)
 }

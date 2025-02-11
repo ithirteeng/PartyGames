@@ -19,7 +19,7 @@ data class ChainSocketInitResponse(
 
         const val MESSAGE_SIZE = 4
 
-        fun fromBytes(byteArray: ByteArray, offset: Int): ChainSocketInitResponse{
+        fun fromBytes(byteArray: ByteArray, offset: Int): ChainSocketInitResponse {
             val byteBuf = ByteBuffer.wrap(byteArray, offset, MESSAGE_SIZE)
                 .order(ByteOrder.BIG_ENDIAN)
             val statusCode = byteBuf.int

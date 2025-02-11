@@ -86,7 +86,7 @@ fun WifiManager.startLocalOnlyHotspotWithConfig(
  * Option 1: use WifiManager.setWifiApConfiguration to set the default tethering ap configuration,
  * and set mac randomization to NONE. This is blocked by a requirement for OVERRIDE_WIFI_CONFIG
  * permission (which is not available to third party app). See WifiServiceImpl#setSoftApConfiguration
-  https://cs.android.com/android/platform/superproject/+/android-13.0.0_r54:packages/modules/Wifi/service/java/com/android/server/wifi/WifiServiceImpl.java;l=2727
+https://cs.android.com/android/platform/superproject/+/android-13.0.0_r54:packages/modules/Wifi/service/java/com/android/server/wifi/WifiServiceImpl.java;l=2727
  *
  * Option 2: try to disable Wifi Mac randomization so that the generateLocalOnlyHotspotConfig will
  * set randomization to NONE. Won't work: AP config util uses a system resource
@@ -114,15 +114,18 @@ fun WifiManager.LocalOnlyHotspotReservation.toLocalHotspotConfig(
     port: Int,
     logger: MNetLogger? = null,
 ): WifiConnectConfig {
-    return if(Build.VERSION.SDK_INT >= 30) {
+    return if (Build.VERSION.SDK_INT >= 30) {
         val softApConfig = softApConfiguration
         val ssid = softApConfig.ssidCompat
         val passphrase = softApConfig.passphrase
         val bssid = softApConfig.bssid
 
-        logger?.invoke(Log.DEBUG, "toLocalOnlyHotspotConfig: got SoftApConfig: ${softApConfig.prettyPrint()}")
+        logger?.invoke(
+            Log.DEBUG,
+            "toLocalOnlyHotspotConfig: got SoftApConfig: ${softApConfig.prettyPrint()}"
+        )
 
-        if(ssid != null && passphrase != null) {
+        if (ssid != null && passphrase != null) {
             WifiConnectConfig(
                 nodeVirtualAddr = nodeVirtualAddr,
                 ssid = ssid,
@@ -132,20 +135,27 @@ fun WifiManager.LocalOnlyHotspotReservation.toLocalHotspotConfig(
                 bssid = bssid?.toString(),
                 linkLocalAddr = null,
             )
-        }else {
-            logger?.invoke(Log.ERROR, "toLocalHotspotConfig: ssid and passphrase " +
-                    "not provided by SoftApConfig: ${softApConfig.prettyPrint()}")
-            throw IllegalStateException("toLocalHotspotConfig: ssid and passphrase not provided by " +
-                    "SoftApConfig: ${softApConfig.prettyPrint()}!")
+        } else {
+            logger?.invoke(
+                Log.ERROR, "toLocalHotspotConfig: ssid and passphrase " +
+                        "not provided by SoftApConfig: ${softApConfig.prettyPrint()}"
+            )
+            throw IllegalStateException(
+                "toLocalHotspotConfig: ssid and passphrase not provided by " +
+                        "SoftApConfig: ${softApConfig.prettyPrint()}!"
+            )
         }
-    }else {
+    } else {
         val wifiConfig = wifiConfiguration
         val ssid = wifiConfig?.SSID
         val passphrase = wifiConfig?.preSharedKey?.removeSurrounding("\"")
         val bssid = wifiConfig?.BSSID
-        logger?.invoke(Log.DEBUG, "toLocalOnlyHotspotConfig: Got wifiConfiguration: ${wifiConfig?.prettyPrint()}")
+        logger?.invoke(
+            Log.DEBUG,
+            "toLocalOnlyHotspotConfig: Got wifiConfiguration: ${wifiConfig?.prettyPrint()}"
+        )
 
-        if(ssid != null && passphrase != null) {
+        if (ssid != null && passphrase != null) {
             WifiConnectConfig(
                 nodeVirtualAddr = nodeVirtualAddr,
                 ssid = ssid,
@@ -155,11 +165,15 @@ fun WifiManager.LocalOnlyHotspotReservation.toLocalHotspotConfig(
                 linkLocalAddr = null,
                 bssid = bssid,
             )
-        }else {
-            logger?.invoke(Log.ERROR, "toLocalHotspotConfig: ssid and passphrase " +
-                    "not provided by WifiConfig: $wifiConfig")
-            throw IllegalStateException("toLocalHotspotConfig: ssid and passphrase not provided by " +
-                    "SoftApConfig: $wifiConfig!")
+        } else {
+            logger?.invoke(
+                Log.ERROR, "toLocalHotspotConfig: ssid and passphrase " +
+                        "not provided by WifiConfig: $wifiConfig"
+            )
+            throw IllegalStateException(
+                "toLocalHotspotConfig: ssid and passphrase not provided by " +
+                        "SoftApConfig: $wifiConfig!"
+            )
         }
     }
 }

@@ -45,7 +45,7 @@ enum class HotspotPersistenceType(val flag: Byte) {
     }
 }
 
-object HotspotPersistenceTypeSerializer: KSerializer<HotspotPersistenceType> {
+object HotspotPersistenceTypeSerializer : KSerializer<HotspotPersistenceType> {
     override fun deserialize(decoder: Decoder): HotspotPersistenceType {
         return HotspotPersistenceType.fromFlag(decoder.decodeByte())
     }

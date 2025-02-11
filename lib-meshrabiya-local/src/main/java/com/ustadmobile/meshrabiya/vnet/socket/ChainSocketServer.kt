@@ -51,13 +51,13 @@ class ChainSocketServer(
     private val clientFutures: MutableList<WeakReference<Future<*>>> = CopyOnWriteArrayList()
 
     private val acceptRunnable = Runnable {
-        while(!Thread.interrupted() && !serverSocket.isClosed) {
+        while (!Thread.interrupted() && !serverSocket.isClosed) {
             try {
                 val incomingSocket = serverSocket.accept()
                 logger(Log.DEBUG, "$logPrefix accepted new client")
                 executorService.submit(ClientInitRunnable(incomingSocket))
-            }catch(e: Exception) {
-                if(!serverSocket.isClosed) {
+            } catch (e: Exception) {
+                if (!serverSocket.isClosed) {
                     logger(Log.WARN, "$logPrefix exception accepting client", e)
                     Thread.sleep(1000)
                 }
@@ -73,11 +73,11 @@ class ChainSocketServer(
         logger(Log.INFO, "$logPrefix init")
     }
 
-    private inner class ClientInitRunnable(private val incomingSocket: Socket): Runnable {
+    private inner class ClientInitRunnable(private val incomingSocket: Socket) : Runnable {
         override fun run() {
             logger(
                 Log.DEBUG,
-                message = {"$logPrefix ${incomingSocket.remoteSocketAddress} : init client - reading init request..."}
+                message = { "$logPrefix ${incomingSocket.remoteSocketAddress} : init client - reading init request..." }
             )
 
             //read the destination - find next connection
@@ -90,7 +90,7 @@ class ChainSocketServer(
             logger(Log.DEBUG,
                 message = {
                     "$logPrefix $clientAddr : receive init request to " +
-                        "connect to ${initRequest.virtualDestAddr}:${initRequest.virtualDestPort}"
+                            "connect to ${initRequest.virtualDestAddr}:${initRequest.virtualDestPort}"
                 }
             )
 
@@ -121,7 +121,13 @@ class ChainSocketServer(
                 CopyStreamRunnable(clientAddr, onwardSocket, incomingSocket, "onwardToIncoming")
             )
             val incomingToOnwardFuture = executorService.submit(
-                CopyStreamRunnable(clientAddr, incomingSocket, onwardSocket, "incomingToOnward", onwardToIncomingFuture)
+                CopyStreamRunnable(
+                    clientAddr,
+                    incomingSocket,
+                    onwardSocket,
+                    "incomingToOnward",
+                    onwardToIncomingFuture
+                )
             )
             clientFutures += WeakReference(onwardToIncomingFuture)
             clientFutures += WeakReference(incomingToOnwardFuture)
@@ -134,25 +140,29 @@ class ChainSocketServer(
         private val toSocket: Socket,
         private val name: String,
         private val otherFuture: Future<*>? = null,
-    ): Runnable {
+    ) : Runnable {
 
         override fun run() {
             val outStream = toSocket.getOutputStream()
             val inStream = fromSocket.getInputStream()
             try {
-                logger(Log.VERBOSE, {"$logPrefix $clientAddr : CopyStream: $name - start copying input to output"})
+                logger(
+                    Log.VERBOSE,
+                    { "$logPrefix $clientAddr : CopyStream: $name - start copying input to output" })
                 inStream.copyTo(outStream)
-                logger(Log.VERBOSE, {"$logPrefix $clientAddr : CopyStream: $name - finished copying - reached end of stream"})
-            }catch(e: Exception) {
-                logger(Log.WARN, {"$logPrefix $clientAddr: CopyStream: aborting"}, e)
-            }finally {
+                logger(
+                    Log.VERBOSE,
+                    { "$logPrefix $clientAddr : CopyStream: $name - finished copying - reached end of stream" })
+            } catch (e: Exception) {
+                logger(Log.WARN, { "$logPrefix $clientAddr: CopyStream: aborting" }, e)
+            } finally {
                 //Need to explicitly close the streams we are handling immediately
                 inStream.close()
                 //Closing output stream will ensure that the client on the other side realizes that
                 // its input is finished.
                 outStream.close()
 
-                if(otherFuture != null) {
+                if (otherFuture != null) {
                     otherFuture.get()
                     fromSocket.close()
                     toSocket.close()

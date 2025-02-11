@@ -12,10 +12,10 @@ import java.nio.ByteBuffer
 fun ByteBuffer.putStringFromBytes(
     strBytes: ByteArray?
 ): ByteBuffer {
-    if(strBytes != null) {
+    if (strBytes != null) {
         putInt(strBytes.size)
         put(strBytes)
-    }else {
+    } else {
         putInt(-1)
     }
     return this
@@ -26,30 +26,31 @@ fun ByteBuffer.putStringFromBytes(
  */
 fun ByteBuffer.getString(): String? {
     val len = int
-    if(len != -1) {
+    if (len != -1) {
         val strBytes = ByteArray(len)
         get(strBytes)
         return String(strBytes)
-    }else {
+    } else {
         return null
     }
 }
 
-fun ByteBuffer.putBoolean(boolean: Boolean) : ByteBuffer {
-    return put(if(boolean) 1 else 0)
+fun ByteBuffer.putBoolean(boolean: Boolean): ByteBuffer {
+    return put(if (boolean) 1 else 0)
 }
 
-fun ByteBuffer.getBoolean() : Boolean {
+fun ByteBuffer.getBoolean(): Boolean {
     return get() != 0.toByte()
 }
 
-fun ByteBuffer.getStringOrThrow() : String {
-    return getString() ?: throw NullPointerException("ByteBuffer.getStringOrThrow: stored string was null")
+fun ByteBuffer.getStringOrThrow(): String {
+    return getString()
+        ?: throw NullPointerException("ByteBuffer.getStringOrThrow: stored string was null")
 }
 
 fun ByteBuffer.putInet4Address(inetAddress: InetAddress): ByteBuffer {
     val addressBytes = inetAddress.address
-    if(addressBytes.size != 4)
+    if (addressBytes.size != 4)
         throw IllegalArgumentException("putInetAddr: expected address of 4 bytes got ${addressBytes.size}")
 
     put(inetAddress.address)

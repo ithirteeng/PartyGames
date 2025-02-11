@@ -9,7 +9,7 @@ import kotlinx.serialization.encoding.Encoder
 import java.io.File
 
 
-object FileSerializer: KSerializer<File> {
+object FileSerializer : KSerializer<File> {
     override fun deserialize(decoder: Decoder): File {
         return File(decoder.decodeString())
     }

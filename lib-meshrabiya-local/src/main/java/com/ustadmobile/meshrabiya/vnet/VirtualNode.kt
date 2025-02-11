@@ -1,12 +1,12 @@
 package com.ustadmobile.meshrabiya.vnet
 
 import android.util.Log
-import com.ustadmobile.meshrabiya.log.MNetLoggerStdout
 import com.ustadmobile.meshrabiya.ext.addressToByteArray
 import com.ustadmobile.meshrabiya.ext.addressToDotNotation
 import com.ustadmobile.meshrabiya.ext.prefixMatches
 import com.ustadmobile.meshrabiya.ext.requireAddressAsInt
 import com.ustadmobile.meshrabiya.log.MNetLogger
+import com.ustadmobile.meshrabiya.log.MNetLoggerStdout
 import com.ustadmobile.meshrabiya.mmcp.MmcpHotspotRequest
 import com.ustadmobile.meshrabiya.mmcp.MmcpHotspotResponse
 import com.ustadmobile.meshrabiya.mmcp.MmcpMessage
@@ -27,10 +27,10 @@ import com.ustadmobile.meshrabiya.vnet.socket.ChainSocketNextHop
 import com.ustadmobile.meshrabiya.vnet.socket.ChainSocketServer
 import com.ustadmobile.meshrabiya.vnet.wifi.ConnectBand
 import com.ustadmobile.meshrabiya.vnet.wifi.HotspotType
-import com.ustadmobile.meshrabiya.vnet.wifi.WifiConnectConfig
-import com.ustadmobile.meshrabiya.vnet.wifi.MeshrabiyaWifiManager
 import com.ustadmobile.meshrabiya.vnet.wifi.LocalHotspotRequest
 import com.ustadmobile.meshrabiya.vnet.wifi.LocalHotspotResponse
+import com.ustadmobile.meshrabiya.vnet.wifi.MeshrabiyaWifiManager
+import com.ustadmobile.meshrabiya.vnet.wifi.WifiConnectConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

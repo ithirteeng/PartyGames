@@ -11,7 +11,7 @@ import javax.net.SocketFactory
  * @param virtualRouter local node virtual router
  * @param systemSocketFactory the underlying system socket factory
  */
-abstract class ChainSocketFactory: SocketFactory() {
+abstract class ChainSocketFactory : SocketFactory() {
 
     data class ChainSocketResult(
         val socket: Socket,

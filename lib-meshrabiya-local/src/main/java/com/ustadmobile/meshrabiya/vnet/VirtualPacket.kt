@@ -101,7 +101,7 @@ class VirtualPacket private constructor(
 
         fun fromDatagramPacket(
             datagramPacket: DatagramPacket,
-        ) : VirtualPacket {
+        ): VirtualPacket {
             return VirtualPacket(
                 data = datagramPacket.data,
                 dataOffset = datagramPacket.offset
@@ -130,11 +130,13 @@ class VirtualPacket private constructor(
             data: ByteArray,
             payloadOffset: Int,
             headerAlreadyInData: Boolean = false,
-        ) : VirtualPacket {
-            if(payloadOffset < VirtualPacketHeader.HEADER_SIZE)
-                throw IllegalArgumentException("VirtualPacket buffer MUST have at least " +
-                        "${VirtualPacketHeader.HEADER_SIZE} empty bytes (offset) at the beginning to allow " +
-                        "for conversion to/from DatagramPacket without creating a new buffer")
+        ): VirtualPacket {
+            if (payloadOffset < VirtualPacketHeader.HEADER_SIZE)
+                throw IllegalArgumentException(
+                    "VirtualPacket buffer MUST have at least " +
+                            "${VirtualPacketHeader.HEADER_SIZE} empty bytes (offset) at the beginning to allow " +
+                            "for conversion to/from DatagramPacket without creating a new buffer"
+                )
 
             return VirtualPacket(
                 data = data,
@@ -145,7 +147,7 @@ class VirtualPacket private constructor(
         }
     }
 
-    fun isBroadcast() : Boolean {
+    fun isBroadcast(): Boolean {
         return header.toAddr == ADDR_BROADCAST
     }
 

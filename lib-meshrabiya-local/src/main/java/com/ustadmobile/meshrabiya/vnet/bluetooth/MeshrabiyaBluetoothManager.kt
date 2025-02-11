@@ -15,7 +15,4 @@ class MeshrabiyaBluetoothManager(
     private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
 
-
-
-
 }

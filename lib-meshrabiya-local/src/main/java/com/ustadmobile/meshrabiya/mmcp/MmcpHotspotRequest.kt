@@ -9,11 +9,12 @@ import java.nio.ByteOrder
 class MmcpHotspotRequest(
     messageId: Int,
     val hotspotRequest: LocalHotspotRequest,
-): MmcpMessage(WHAT_HOTSPOT_REQUEST, messageId) {
+) : MmcpMessage(WHAT_HOTSPOT_REQUEST, messageId) {
 
 
     override fun toBytes(): ByteArray {
-        return headerAndPayloadToBytes(header,
+        return headerAndPayloadToBytes(
+            header,
             ByteBuffer.wrap(ByteArray(2))
                 .put(hotspotRequest.preferredBand.flag)
                 .put(hotspotRequest.preferredType.flag)
@@ -42,7 +43,7 @@ class MmcpHotspotRequest(
         fun fromBytes(
             byteArray: ByteArray,
             offset: Int = 0,
-            len: Int =  byteArray.size,
+            len: Int = byteArray.size,
         ): MmcpHotspotRequest {
             val (header, payload) = mmcpHeaderAndPayloadFromBytes(
                 byteArray, offset, len

@@ -33,7 +33,7 @@ class MmcpHotspotResponse(
         fun fromBytes(
             byteArray: ByteArray,
             offset: Int = 0,
-            len: Int =  byteArray.size,
+            len: Int = byteArray.size,
         ): MmcpHotspotResponse {
             try {
                 val (header, payload) = mmcpHeaderAndPayloadFromBytes(
@@ -42,7 +42,7 @@ class MmcpHotspotResponse(
 
                 val response = LocalHotspotResponse.fromBytes(payload, 0)
                 return MmcpHotspotResponse(header.messageId, response)
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 println("FFS")
                 e.printStackTrace()
                 throw e

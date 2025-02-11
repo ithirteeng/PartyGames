@@ -8,7 +8,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.net.InetAddress
 
-object InetAddressSerializer: KSerializer<InetAddress> {
+object InetAddressSerializer : KSerializer<InetAddress> {
 
     override val descriptor: SerialDescriptor
         get() = PrimitiveSerialDescriptor("inetaddr", PrimitiveKind.STRING)

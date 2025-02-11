@@ -15,8 +15,8 @@ import android.content.IntentFilter
 import android.util.Log
 import com.ustadmobile.meshrabiya.MeshrabiyaConstants.LOG_TAG
 import com.ustadmobile.meshrabiya.MeshrabiyaConstants.UUID_BUSY
-import com.ustadmobile.meshrabiya.log.MNetLoggerStdout
 import com.ustadmobile.meshrabiya.log.MNetLogger
+import com.ustadmobile.meshrabiya.log.MNetLoggerStdout
 import com.ustadmobile.meshrabiya.server.OnUuidAllocatedListener
 import com.ustadmobile.meshrabiya.toBytes
 import java.io.Closeable
@@ -46,8 +46,10 @@ class VirtualNodeGattServer(
 
     private val isClosed = AtomicBoolean(false)
 
-    private val service = BluetoothGattService(allocationServiceUuid,
-        BluetoothGattService.SERVICE_TYPE_PRIMARY)
+    private val service = BluetoothGattService(
+        allocationServiceUuid,
+        BluetoothGattService.SERVICE_TYPE_PRIMARY
+    )
 
     private val characteristic = BluetoothGattCharacteristic(
         allocationCharacteristicUuid,
@@ -80,30 +82,31 @@ class VirtualNodeGattServer(
 
     private var receiverRegistered: Boolean = false
 
-    private val gattServerCallback = object: BluetoothGattServerCallback() {
+    private val gattServerCallback = object : BluetoothGattServerCallback() {
         override fun onServiceAdded(status: Int, service: BluetoothGattService?) {
             super.onServiceAdded(status, service)
-            Log.d(LOG_TAG , "Service added: ${service?.uuid} characteristics " +
-                    "= ${service?.characteristics?.joinToString { it.uuid.toString() }}")
+            Log.d(LOG_TAG, "Service added: ${service?.uuid} characteristics " +
+                    "= ${service?.characteristics?.joinToString { it.uuid.toString() }}"
+            )
         }
 
         override fun onConnectionStateChange(device: BluetoothDevice?, status: Int, newState: Int) {
             super.onConnectionStateChange(device, status, newState)
             Log.d(LOG_TAG, "onConnectionChanged: ${device?.address}: status = $newState")
-            if(status == BluetoothGatt.STATE_CONNECTED && device != null) {
+            if (status == BluetoothGatt.STATE_CONNECTED && device != null) {
                 try {
                     Log.i(LOG_TAG, "onConnectionChanged: connecting to ${device.address}")
                     gattServer?.connect(device, false)
-                }catch(e: SecurityException) {
+                } catch (e: SecurityException) {
                     e.printStackTrace()
                 }
-            }else if(status == BluetoothGatt.STATE_DISCONNECTED) {
+            } else if (status == BluetoothGatt.STATE_DISCONNECTED) {
                 try {
                     device?.also {
                         gattServer?.cancelConnection(it)
                         Log.d(LOG_TAG, "onConnectionChange: disconnected. cancelConnection called.")
                     }
-                }catch(e: SecurityException) {
+                } catch (e: SecurityException) {
                     Log.e(LOG_TAG, "Security exception on cancelConnection: permission revoked?", e)
                 }
             }
@@ -115,51 +118,57 @@ class VirtualNodeGattServer(
             offset: Int,
             characteristic: BluetoothGattCharacteristic
         ) {
-            if(characteristic.uuid == allocationCharacteristicUuid) {
+            if (characteristic.uuid == allocationCharacteristicUuid) {
                 try {
                     val allocatedUuid = allocatedUuidLock.withLock {
-                        if(allocatedUuids.size < maxSimultaneousClients) {
+                        if (allocatedUuids.size < maxSimultaneousClients) {
                             UUID.randomUUID().also {
                                 allocatedUuids[it] = device
                             }
-                        }else {
+                        } else {
                             UUID_BUSY
                         }
                     }
 
-                    val responseSent = gattServer?.sendResponse(device, requestId,
-                        BluetoothGatt.GATT_SUCCESS, 0, allocatedUuid.toBytes())
+                    val responseSent = gattServer?.sendResponse(
+                        device, requestId,
+                        BluetoothGatt.GATT_SUCCESS, 0, allocatedUuid.toBytes()
+                    )
 
-                    if(allocatedUuid != UUID_BUSY && responseSent == true){
+                    if (allocatedUuid != UUID_BUSY && responseSent == true) {
                         useUuidExecutor.submit(DataAcceptRunnable(allocatedUuid, onUuidAllocated))
-                        Log.i(LOG_TAG, "Send allocated uuid $allocatedUuid to ${device.address} : sent=$responseSent")
-                    }else if(allocatedUuid != UUID_BUSY && responseSent != true) {
+                        Log.i(
+                            LOG_TAG,
+                            "Send allocated uuid $allocatedUuid to ${device.address} : sent=$responseSent"
+                        )
+                    } else if (allocatedUuid != UUID_BUSY && responseSent != true) {
                         //We had a UUID to allocate, but we could not send it to the client. Don't
                         //start the thread, and remove the allocation from the list to avoid tying it up
                         allocatedUuids.remove(allocatedUuid)
                     }
 
-                }catch(e: SecurityException) {
+                } catch (e: SecurityException) {
                     e.printStackTrace()
                 }
-            }else {
+            } else {
                 Log.d(LOG_TAG, "onCharacteristicReadRequest: not our service")
             }
         }
     }
 
-    private val broadcastReceiver: BroadcastReceiver = object: BroadcastReceiver() {
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context?, intent: Intent?) {
-            if(intent != null && intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+            if (intent != null && intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
                 val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
-                when(state) {
+                when (state) {
                     BluetoothAdapter.STATE_ON -> {
-                        if(started)
+                        if (started)
                             openGattServer()
                     }
+
                     BluetoothAdapter.STATE_OFF -> {
-                        if(started)
+                        if (started)
                             closeGattServer()
                     }
                 }
@@ -171,12 +180,12 @@ class VirtualNodeGattServer(
     private inner class DataAcceptRunnable(
         private val allocatedUuid: UUID,
         private val useUuid: OnUuidAllocatedListener,
-    ) : Runnable{
+    ) : Runnable {
         override fun run() {
             try {
                 Log.d(LOG_TAG, "Run allocated UUID runnable for $allocatedUuid")
                 useUuid(allocatedUuid)
-            }finally {
+            } finally {
                 allocatedUuids.remove(allocatedUuid)
             }
         }
@@ -201,24 +210,24 @@ class VirtualNodeGattServer(
      * effect. If the adapter is not enabled, it will also have no effect.
      */
     private fun openGattServer() {
-        if(isClosed.get())
+        if (isClosed.get())
             throw IllegalStateException("Cannot start/open gatt server: UuidAllocationServer closed!")
 
-        if(gattServer == null && bluetoothAdapter?.isEnabled == true) {
+        if (gattServer == null && bluetoothAdapter?.isEnabled == true) {
             try {
                 bluetoothManager.openGattServer(appContext, gattServerCallback).also {
                     Log.d(LOG_TAG, "Opened Gatt server")
-                    if(it.addService(service)) {
+                    if (it.addService(service)) {
                         gattServer = it
                         Log.d(LOG_TAG, "Add service request submitted")
-                    }else {
+                    } else {
                         Log.e(LOG_TAG, "Add service request submission failed, close")
                         it.close()
                     }
                 }
-            }catch(e: SecurityException) {
+            } catch (e: SecurityException) {
                 Log.e(LOG_TAG, "Security exception opening gatt server. No permission?", e)
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.e(LOG_TAG, "Other exception opening gatt server.", e)
             }
         }
@@ -233,11 +242,11 @@ class VirtualNodeGattServer(
                 server.close()
                 Log.d(LOG_TAG, "Uuid Allocation gatt server closed")
                 allocatedUuids.clear()
-            }catch(e: SecurityException) {
+            } catch (e: SecurityException) {
                 Log.e(LOG_TAG, "Security exception closing gatt server. No permission?", e)
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.e(LOG_TAG, "Other exception closing gatt server.", e)
-            }finally {
+            } finally {
                 gattServer = null
             }
         }
@@ -251,7 +260,7 @@ class VirtualNodeGattServer(
     }
 
     override fun close() {
-        if(!isClosed.getAndSet(true)) {
+        if (!isClosed.getAndSet(true)) {
             stop()
             useUuidExecutor.shutdown()
         }

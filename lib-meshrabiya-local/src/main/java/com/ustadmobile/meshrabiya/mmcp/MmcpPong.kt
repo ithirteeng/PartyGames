@@ -9,12 +9,14 @@ import java.nio.ByteOrder
 class MmcpPong(
     messageId: Int,
     val replyToMessageId: Int,
-): MmcpMessage(WHAT_PONG, messageId) {
-    override fun toBytes() = headerAndPayloadToBytes(header,
+) : MmcpMessage(WHAT_PONG, messageId) {
+    override fun toBytes() = headerAndPayloadToBytes(
+        header,
         ByteBuffer.wrap(ByteArray(4))
             .order(ByteOrder.BIG_ENDIAN)
             .putInt(replyToMessageId)
-            .array())
+            .array()
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -38,7 +40,7 @@ class MmcpPong(
         fun fromBytes(
             byteArray: ByteArray,
             offset: Int = 0,
-            len: Int =  byteArray.size,
+            len: Int = byteArray.size,
         ): MmcpPong {
             val (header, payload) = mmcpHeaderAndPayloadFromBytes(byteArray, offset, len)
             val replyToMessageId = ByteBuffer.wrap(payload)

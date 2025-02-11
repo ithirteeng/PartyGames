@@ -6,7 +6,7 @@ import com.ustadmobile.meshrabiya.vnet.socket.ChainSocketInitResponse
 import java.io.OutputStream
 import java.nio.ByteBuffer
 
-fun OutputStream.writeAddress(address: Int){
+fun OutputStream.writeAddress(address: Int) {
     val buffer = ByteBuffer.wrap(ByteArray(4))
     buffer.putInt(address)
     write(buffer.array())

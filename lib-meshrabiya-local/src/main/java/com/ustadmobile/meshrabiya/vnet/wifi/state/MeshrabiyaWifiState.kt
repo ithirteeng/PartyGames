@@ -1,9 +1,9 @@
 package com.ustadmobile.meshrabiya.vnet.wifi.state
 
 import com.ustadmobile.meshrabiya.vnet.WifiRole
-import com.ustadmobile.meshrabiya.vnet.wifi.WifiConnectConfig
 import com.ustadmobile.meshrabiya.vnet.wifi.HotspotStatus
 import com.ustadmobile.meshrabiya.vnet.wifi.HotspotType
+import com.ustadmobile.meshrabiya.vnet.wifi.WifiConnectConfig
 
 
 data class MeshrabiyaWifiState(
@@ -29,8 +29,8 @@ data class MeshrabiyaWifiState(
         get() = wifiDirectState.hotspotStatus == HotspotStatus.STARTED
                 || localOnlyHotspotState.status == HotspotStatus.STARTED
 
-    fun hotspotError(hotspotType: HotspotType) : Int {
-        return when(hotspotType) {
+    fun hotspotError(hotspotType: HotspotType): Int {
+        return when (hotspotType) {
             HotspotType.LOCALONLY_HOTSPOT -> localOnlyHotspotState.error
             HotspotType.WIFIDIRECT_GROUP -> wifiDirectState.error
             HotspotType.AUTO -> 0
@@ -44,17 +44,17 @@ data class MeshrabiyaWifiState(
      */
     val hotspotTypeToCreate: HotspotType?
         get() {
-            return if(connectConfig != null)
-                //Hotspot already available- nothing to create
+            return if (connectConfig != null)
+            //Hotspot already available- nothing to create
                 null
-            else if(
-                //WifiDirect Group or Local Only hotspot already being created, do nothing
+            else if (
+            //WifiDirect Group or Local Only hotspot already being created, do nothing
                 hotspotIsStarting
             ) {
                 null
-            } else if(concurrentApStationSupported){
+            } else if (concurrentApStationSupported) {
                 HotspotType.LOCALONLY_HOTSPOT
-            }else {
+            } else {
                 HotspotType.WIFIDIRECT_GROUP
             }
 

@@ -11,7 +11,7 @@ import java.util.UUID
  * This also allows each node to have a single port that can then be used to determine the final UUID
  * e.g. if the mask and port are known, we know the UUID that will be used for a particular service.
  */
-fun uuidForMaskAndPort(mask: UUID, port: Int): UUID{
+fun uuidForMaskAndPort(mask: UUID, port: Int): UUID {
     val newLeastSigBits = mask.leastSignificantBits.shl(16)
         .or(port.toLong())
     return UUID(mask.mostSignificantBits, newLeastSigBits)
@@ -28,7 +28,7 @@ fun UUID.maskedPort(): Int {
  * Check if given UUID matches a mask (e.g. as used in uuidForMaskAndPort)
  */
 fun UUID.matchesMask(mask: UUID): Boolean {
-    if(mask.mostSignificantBits != mostSignificantBits)
+    if (mask.mostSignificantBits != mostSignificantBits)
         return false
 
     //Cut off the rightmost 16 bits (e.g. where the port is stored)

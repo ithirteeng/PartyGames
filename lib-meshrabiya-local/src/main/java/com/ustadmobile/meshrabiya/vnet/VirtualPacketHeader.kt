@@ -1,6 +1,5 @@
 package com.ustadmobile.meshrabiya.vnet
 
-import android.util.Log
 import com.ustadmobile.meshrabiya.ext.getStringOrThrow
 import com.ustadmobile.meshrabiya.ext.putStringFromBytes
 import java.nio.ByteBuffer
@@ -48,7 +47,7 @@ data class VirtualPacketHeader(
 ) {
 
     init {
-        if(payloadSize > MAX_PAYLOAD)
+        if (payloadSize > MAX_PAYLOAD)
             throw IllegalArgumentException("Payload size must not be > $MAX_PAYLOAD")
     }
 

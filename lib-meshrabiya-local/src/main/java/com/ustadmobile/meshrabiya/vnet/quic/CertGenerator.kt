@@ -18,7 +18,7 @@ import java.util.Date
 //See https://gist.github.com/alessandroleite/fa3e763552bb8b409bfa
 // See also: https://www.programcreek.com/java-api-examples/?api=org.bouncycastle.cert.X509v3CertificateBuilder
 
-fun generateKeyPair() : KeyPair {
+fun generateKeyPair(): KeyPair {
     val keyGenerator = KeyPairGenerator.getInstance("RSA")
     keyGenerator.initialize(2048, SecureRandom())
     val keyPair = keyGenerator.generateKeyPair()
@@ -36,8 +36,8 @@ fun generateX509Cert(
     },
     issuerName: X500Name = X500Name("CN=Meshrabiya"),
     subjectName: X500Name = X500Name("CN=Meshrabiya, OU=Mesh Net, O=UstadMobile FZLLC, L=Dubai, C=AE"),
-) : X509Certificate{
-    val subjectPublicKeyInfo =  SubjectPublicKeyInfo.getInstance(keyPair.public.encoded)
+): X509Certificate {
+    val subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.public.encoded)
     val certBuilder = X509v3CertificateBuilder(
         issuerName,
         BigInteger.valueOf(System.currentTimeMillis()),

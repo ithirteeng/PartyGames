@@ -28,7 +28,7 @@ open class VirtualDatagramSocketImpl(
     private val localVirtualAddress: Int,
     private val logger: MNetLogger,
     private val deviceName: String,
-): DatagramSocketImpl() {
+) : DatagramSocketImpl() {
     private val logPrefix: String
         get() = "[VirtualDatagramSocketImpl] "
 
@@ -44,7 +44,7 @@ open class VirtualDatagramSocketImpl(
         get() = localPort
 
     private fun assertNotClosed() {
-        if(closed.get())
+        if (closed.get())
             throw IllegalStateException("VirtualDatagramSocket assertNotClosed fail: $localPort is closed!")
     }
 
@@ -53,25 +53,32 @@ open class VirtualDatagramSocketImpl(
      * the destination.
      */
     internal fun onIncomingPacket(virtualPacket: VirtualPacket) {
-        if(closed.get())
+        if (closed.get())
             return // do nothing
 
         logger(Log.VERBOSE,
-            message = {"$logPrefix incoming virtual packet=${virtualPacket.datagramPacketSize} bytes " +
-                    "from ${virtualPacket.header.fromAddr.addressToDotNotation()}:" +
-                    "${virtualPacket.header.fromPort} "}
+            message = {
+                "$logPrefix incoming virtual packet=${virtualPacket.datagramPacketSize} bytes " +
+                        "from ${virtualPacket.header.fromAddr.addressToDotNotation()}:" +
+                        "${virtualPacket.header.fromPort} "
+            }
         )
 
         val buffer = receiveBufferPool.acquire() ?: ByteArray(VirtualPacket.VIRTUAL_PACKET_BUF_SIZE)
 
         //Copy from the virtual packet into the pool buffer
-        System.arraycopy(virtualPacket.data, virtualPacket.payloadOffset,
-            buffer, VirtualPacketHeader.HEADER_SIZE, virtualPacket.header.payloadSize)
+        System.arraycopy(
+            virtualPacket.data, virtualPacket.payloadOffset,
+            buffer, VirtualPacketHeader.HEADER_SIZE, virtualPacket.header.payloadSize
+        )
 
-        val datagramPacket = DatagramPacket(buffer, VirtualPacketHeader.HEADER_SIZE,
-            virtualPacket.header.payloadSize)
+        val datagramPacket = DatagramPacket(
+            buffer, VirtualPacketHeader.HEADER_SIZE,
+            virtualPacket.header.payloadSize
+        )
         datagramPacket.address = InetAddress.getByAddress(
-            virtualPacket.header.fromAddr.addressToByteArray())
+            virtualPacket.header.fromAddr.addressToByteArray()
+        )
         datagramPacket.port = virtualPacket.header.fromPort
         datagramPacket.length = virtualPacket.header.payloadSize
         receiveQueue.put(datagramPacket)
@@ -90,22 +97,24 @@ open class VirtualDatagramSocketImpl(
     }
 
     public override fun bind(lport: Int, laddr: InetAddress) {
-        logger(Log.VERBOSE, { "$logPrefix bind laddr=$laddr lport=$lport"})
+        logger(Log.VERBOSE, { "$logPrefix bind laddr=$laddr lport=$lport" })
         localPort = router.allocateUdpPortOrThrow(this, lport)
     }
 
     public override fun send(p: DatagramPacket) {
         assertNotClosed()
         logger(Log.VERBOSE,
-            message = {"$logPrefix send packet size=${p.length} bytes to ${p.address}:${p.port}"}
+            message = { "$logPrefix send packet size=${p.length} bytes to ${p.address}:${p.port}" }
         )
 
         //need to borrow a buffer
         //convert to virtual packet, then send using router.
         val buffer = sendBufferPool.acquire() ?: ByteArray(VirtualPacket.VIRTUAL_PACKET_BUF_SIZE)
         try {
-            System.arraycopy(p.data, p.offset,
-                buffer, VirtualPacketHeader.HEADER_SIZE, p.length)
+            System.arraycopy(
+                p.data, p.offset,
+                buffer, VirtualPacketHeader.HEADER_SIZE, p.length
+            )
 
             val virtualPacket = VirtualPacket.fromHeaderAndPayloadData(
                 header = VirtualPacketHeader(
@@ -114,7 +123,7 @@ open class VirtualDatagramSocketImpl(
                     fromAddr = localVirtualAddress,
                     fromPort = localPort,
                     lastHopAddr = 0,
-                    hopCount =  0,
+                    hopCount = 0,
                     maxHops = 5,
                     payloadSize = p.length,
                     deviceName = deviceName
@@ -123,7 +132,7 @@ open class VirtualDatagramSocketImpl(
                 payloadOffset = VirtualPacketHeader.HEADER_SIZE,
             )
             router.route(virtualPacket)
-        }finally {
+        } finally {
             sendBufferPool.release(buffer)
         }
     }
@@ -142,12 +151,14 @@ open class VirtualDatagramSocketImpl(
         val bufferPacket = receiveQueue.take()
 
         try {
-            System.arraycopy(bufferPacket.data, bufferPacket.offset, p.data,
-                p.offset, bufferPacket.length)
+            System.arraycopy(
+                bufferPacket.data, bufferPacket.offset, p.data,
+                p.offset, bufferPacket.length
+            )
             p.length = bufferPacket.length
             p.address = bufferPacket.address
             p.port = bufferPacket.port
-        }finally {
+        } finally {
             receiveBufferPool.release(bufferPacket.data)
         }
     }
@@ -187,7 +198,7 @@ open class VirtualDatagramSocketImpl(
     }
 
     override fun close() {
-        if(!closed.getAndSet(true)) {
+        if (!closed.getAndSet(true)) {
             router.deallocatePort(Protocol.UDP, localPort)
         }
     }
