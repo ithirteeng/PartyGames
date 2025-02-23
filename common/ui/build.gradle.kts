@@ -17,9 +17,9 @@ dependencies {
     api(stack.androidx.activity.compose)
     api(stack.androidx.core.ktx)
     api(stack.androidx.lifecycle.runtime.ktx)
-    api(stack.androidx.material3)
+    api(stack.androidx.compose.material3)
     api(stack.androidx.navigation.compose)
-    api(stack.androidx.ui)
-    api(stack.androidx.ui.graphics)
-    api(stack.androidx.ui.tooling.preview)
+    api(stack.androidx.compose.ui)
+    api(stack.androidx.compose.ui.graphics)
+    api(stack.androidx.compose.ui.tooling.preview)
 }

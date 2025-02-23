@@ -1,22 +1,14 @@
 plugins {
     common.library
     `kotlinx-serialization`
-    `kotlin-composecompiler`
 }
-android {
-    namespace = "com.ith.partygames.screens.common_connection"
 
-    buildFeatures {
-        compose = true
-    }
+android {
+    namespace = "com.ith.partygames.common.data"
 }
 
 dependencies {
-    implementation(project(":common:architecture"))
-    implementation(project(":common:games"))
     implementation(project(":common:mesh-utils"))
-    implementation(project(":common:ui"))
-    implementation(project(":common:data"))
 
     implementation(stack.koin.core)
     implementation(stack.koin.android)
@@ -24,5 +16,4 @@ dependencies {
     implementation(stack.kotlinx.serialization.json)
     implementation(stack.androidx.datastore.preferences)
     implementation(stack.androidx.datastore)
-    implementation(stack.qrcode.scanner)
 }

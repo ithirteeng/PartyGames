@@ -14,7 +14,7 @@ abstract class BaseViewModel<State : BaseState, Event : BaseEvent> : ViewModel()
 
     abstract fun processEvent(event: Event)
 
-    protected fun updateState(execute: () -> State) {
-        _state.update { execute() }
+    protected fun updateState(execute: (oldState: State) -> State) {
+        _state.update { execute(it) }
     }
 }

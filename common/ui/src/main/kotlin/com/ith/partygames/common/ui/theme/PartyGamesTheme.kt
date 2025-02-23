@@ -1,6 +1,7 @@
 package com.ith.partygames.common.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
@@ -13,6 +14,11 @@ object PartyGamesTheme {
         @ReadOnlyComposable
         @Composable
         get() = LocalColors.current
+
+    val materialColors: ColorScheme
+        @ReadOnlyComposable
+        @Composable
+        get() = MaterialTheme.colorScheme
 
     val typography: Typography
         @ReadOnlyComposable

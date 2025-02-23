@@ -5,22 +5,22 @@ import androidx.navigation.toRoute
 import com.ith.partygames.common.architecture.BaseViewModel
 import com.ith.partygames.screens.common_connection.main.navigation.CommonConnectionMainRoute
 
-class CommonConnectionMainViewModel(
+internal class MainViewModel(
     private val savedStateHandle: SavedStateHandle,
-) : BaseViewModel<CommonConnectionMainState, CommonConnectionMainEvent>() {
+) : BaseViewModel<MainState, MainEvent>() {
 
-    override fun initState(): CommonConnectionMainState = CommonConnectionMainState.Loading
+    override fun initState(): MainState = MainState.Loading
 
-    override fun processEvent(event: CommonConnectionMainEvent) {
+    override fun processEvent(event: MainEvent) {
         when (event) {
-            is CommonConnectionMainEvent.Init -> init()
+            is MainEvent.Init -> init()
         }
     }
 
     private fun init() {
         val arguments = savedStateHandle.toRoute<CommonConnectionMainRoute>()
         updateState {
-            CommonConnectionMainState.Content(gameType = arguments.gameType)
+            MainState.Content(gameType = arguments.gameType)
         }
     }
 }

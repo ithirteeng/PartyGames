@@ -24,13 +24,13 @@ fun NavController.navigateToCommonConnectionMainScreen(
 }
 
 internal fun NavGraphBuilder.mainScreen(
-    navigateToCommonConnectionHostScreen: (gameType: GameType) -> Unit,
-    navigateToCommonConnectionClientScreen: (gameType: GameType) -> Unit,
+    navigateToHostScreen: (gameType: GameType) -> Unit,
+    navigateToClientScreen: (gameType: GameType) -> Unit,
 ) {
     composable<CommonConnectionMainRoute> {
         CommonConnectionMainScreen(
-            onBecomeHostButtonClick = navigateToCommonConnectionHostScreen,
-            onBecomeClientButtonClick = navigateToCommonConnectionClientScreen
+            onBecomeHostButtonClick = navigateToHostScreen,
+            onBecomeClientButtonClick = navigateToClientScreen
         )
     }
 }

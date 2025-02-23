@@ -52,33 +52,26 @@ android {
 }
 
 dependencies {
-    // DI
-    implementation(stack.koin.core)
-    implementation(stack.koin.android)
-    implementation(stack.koin.androidx.compose)
-
-    //UI
-    implementation(stack.systemui.controller)
-
-    // local
     implementation(project(":common:architecture"))
+    implementation(project(":common:data"))
     implementation(project(":common:games"))
     implementation(project(":common:ui"))
+
     implementation(project(":lib-meshrabiya-local"))
 
-    implementation(project(":screens:main"))
     implementation(project(":screens:common-connection"))
     implementation(project(":screens:decryptor-game"))
+    implementation(project(":screens:main"))
 
-    //serialization
-    implementation(stack.kotlinx.serialization.json)
-
-    //storage
     implementation(stack.androidx.datastore)
     implementation(stack.androidx.datastore.preferences)
 
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation(stack.koin.android)
+    implementation(stack.koin.androidx.compose)
+    implementation(stack.koin.core)
+
+    implementation(stack.kotlinx.serialization.json)
+
+    implementation(stack.systemui.controller)
+    implementation(stack.qrcode.scanner)
 }

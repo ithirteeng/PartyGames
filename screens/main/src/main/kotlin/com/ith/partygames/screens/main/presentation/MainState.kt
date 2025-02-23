@@ -4,5 +4,7 @@ import com.ith.partygames.common.architecture.BaseState
 import com.ith.partygames.common.games.GameType
 
 data class MainState(
-    val games: List<GameType> = GameType.entries
+    val games: List<GameType> = GameType.entries,
+    val isWifiPermissionGranted: Boolean = false,
+    val isBluetoothPermissionGranted: Boolean = false,
 ) : BaseState

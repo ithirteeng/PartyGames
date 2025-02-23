@@ -13,7 +13,7 @@ internal data class CommonConnectionClientRoute(
     val gameType: GameType,
 )
 
-fun NavController.navigateToCommonConnectionClientScreen(
+internal fun NavController.navigateToClientScreen(
     gameType: GameType,
     navOptions: NavOptions? = null,
 ) {

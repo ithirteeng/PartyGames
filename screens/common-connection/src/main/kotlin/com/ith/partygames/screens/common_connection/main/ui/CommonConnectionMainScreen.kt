@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -16,24 +17,24 @@ import androidx.compose.ui.unit.dp
 import com.ith.partygames.common.games.GameType
 import com.ith.partygames.common.ui.components.LoadingIndicator
 import com.ith.partygames.screens.common_connection.R
-import com.ith.partygames.screens.common_connection.main.presentation.CommonConnectionMainEvent
-import com.ith.partygames.screens.common_connection.main.presentation.CommonConnectionMainState
-import com.ith.partygames.screens.common_connection.main.presentation.CommonConnectionMainViewModel
+import com.ith.partygames.screens.common_connection.main.presentation.MainEvent
+import com.ith.partygames.screens.common_connection.main.presentation.MainState
+import com.ith.partygames.screens.common_connection.main.presentation.MainViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CommonConnectionMainScreen(
-    viewModel: CommonConnectionMainViewModel = koinViewModel(),
+internal fun CommonConnectionMainScreen(
+    viewModel: MainViewModel = koinViewModel(),
     onBecomeHostButtonClick: (gameType: GameType) -> Unit,
     onBecomeClientButtonClick: (gameType: GameType) -> Unit,
 ) {
     when (val state = viewModel.state.collectAsState().value) {
-        is CommonConnectionMainState.Loading -> {
-            viewModel.processEvent(CommonConnectionMainEvent.Init)
+        is MainState.Loading -> {
+            LaunchedEffect(null) { viewModel.processEvent(MainEvent.Init) }
             LoadingIndicator()
         }
 
-        is CommonConnectionMainState.Content -> {
+        is MainState.Content -> {
             Content(
                 state = state,
                 onBecomeHostButtonClick = { onBecomeHostButtonClick(state.gameType) },
@@ -45,7 +46,7 @@ fun CommonConnectionMainScreen(
 
 @Composable
 private fun Content(
-    state: CommonConnectionMainState.Content,
+    state: MainState.Content,
     onBecomeHostButtonClick: () -> Unit,
     pnBecomeClientButtonClick: () -> Unit
 ) {
