@@ -9,7 +9,7 @@ import com.ith.partygames.screens.common_connection.client.ui.CommonConnectionCl
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class CommonConnectionClientRoute(
+internal data class ClientRoute(
     val gameType: GameType,
 )
 
@@ -18,13 +18,13 @@ internal fun NavController.navigateToClientScreen(
     navOptions: NavOptions? = null,
 ) {
     navigate(
-        route = CommonConnectionClientRoute(gameType = gameType),
+        route = ClientRoute(gameType = gameType),
         navOptions = navOptions
     )
 }
 
 internal fun NavGraphBuilder.clientScreen() {
-    composable<CommonConnectionClientRoute> {
+    composable<ClientRoute> {
         CommonConnectionClientScreen()
     }
 }

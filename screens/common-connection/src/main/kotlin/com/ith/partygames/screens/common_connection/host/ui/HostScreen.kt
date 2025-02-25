@@ -30,11 +30,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.zxing.BarcodeFormat
 import com.ith.partygames.common.ui.theme.PartyGamesTheme
 import com.ith.partygames.screens.common_connection.R
-import com.ith.partygames.screens.common_connection.host.presentation.CommonConnectionHostState
+import com.ith.partygames.screens.common_connection.common.ui.InfoText
 import com.ith.partygames.screens.common_connection.host.presentation.HostEffect
 import com.ith.partygames.screens.common_connection.host.presentation.HostEvent
 import com.ith.partygames.screens.common_connection.host.presentation.HostState
 import com.ith.partygames.screens.common_connection.host.presentation.HostViewModel
+import com.ith.partygames.screens.common_connection.host.presentation.HotspotState
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.min
@@ -59,7 +60,7 @@ internal fun HostScreen(
 @Composable
 private fun Content(
     processEvent: (event: HostEvent) -> Unit,
-    state: CommonConnectionHostState
+    state: HostState
 ) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -75,9 +76,9 @@ private fun Content(
         }
 
         item {
-            when (state.hostState) {
-                is HostState.Init -> InitContent(processEvent, state.hostState)
-                is HostState.HotspotActivated -> HotspotActivatedContent(processEvent, state)
+            when (state.hotspotState) {
+                is HotspotState.Init -> InitContent(processEvent, state.hotspotState)
+                is HotspotState.HotspotActivated -> HotspotActivatedContent(processEvent, state)
             }
         }
     }
@@ -86,7 +87,7 @@ private fun Content(
 @Composable
 private fun InitContent(
     processEvent: (event: HostEvent) -> Unit,
-    state: HostState.Init
+    state: HotspotState.Init
 ) {
     Column {
         Button(
@@ -117,7 +118,7 @@ private fun InitContent(
 @Composable
 private fun HotspotActivatedContent(
     processEvent: (event: HostEvent) -> Unit,
-    state: CommonConnectionHostState
+    state: HostState
 ) {
     val barcodeEncoder = remember {
         BarcodeEncoder()
@@ -127,6 +128,7 @@ private fun HotspotActivatedContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
+        InfoText(state.localNodeState)
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = { processEvent(HostEvent.StopHotspotEvent) }

@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 internal class HostViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val androidVirtualNode: AndroidVirtualNode,
-) : ComplexViewModel<CommonConnectionHostState, HostEvent, HostEffect>() {
+) : ComplexViewModel<HostState, HostEvent, HostEffect>() {
 
     init {
         viewModelScope.launch {
@@ -34,7 +34,7 @@ internal class HostViewModel(
         }
     }
 
-    override fun initState(): CommonConnectionHostState = CommonConnectionHostState()
+    override fun initState(): HostState = HostState()
 
     override fun processEvent(event: HostEvent) {
         when (event) {
@@ -59,12 +59,12 @@ internal class HostViewModel(
         if (response != null && response.errorCode != 0) {
             val error = WifiDirectError.errorString(response.errorCode)
             updateState { oldState ->
-                oldState.copy(hostState = HostState.Init(error))
+                oldState.copy(hotspotState = HotspotState.Init(error))
             }
             sendEffect(HostEffect.ShowErrorMessage(error))
         } else {
             updateState { oldState ->
-                oldState.copy(hostState = HostState.HotspotActivated)
+                oldState.copy(hotspotState = HotspotState.HotspotActivated)
             }
         }
     }
@@ -73,7 +73,7 @@ internal class HostViewModel(
         viewModelScope.launch {
             androidVirtualNode.setWifiHotspotEnabled(enabled = false)
             updateState { oldState ->
-                oldState.copy(hostState = HostState.Init())
+                oldState.copy(hotspotState = HotspotState.Init())
             }
         }
     }

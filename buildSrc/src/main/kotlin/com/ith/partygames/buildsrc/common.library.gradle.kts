@@ -1,3 +1,4 @@
+
 plugins {
     `android-library`
     `kotlin-android`
@@ -24,4 +25,8 @@ android {
             isMinifyEnabled = false
         }
     }
+}
+
+dependencies {
+    api("com.jakewharton.timber:timber:5.0.1")
 }

@@ -16,6 +16,6 @@ dependencyResolutionManagement {
         jcenter()
     }
     versionCatalogs {
-        register("stack") { from(files("../gradle/stack.versions.toml")) }
+        create("stack") { from(files("../gradle/stack.versions.toml")) }
     }
 }

@@ -22,6 +22,7 @@ ipaddress = "5.4.0"
 systemuiController = "0.36.0"
 viewModel = "2.8.7"
 qrCode = "4.3.0"
+timber = "5.0.1"
 
 [libraries]
 # Android Libraries
@@ -65,6 +66,7 @@ org-bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on",
 # Additional Libraries
 systemui-controller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "systemuiController" }
 qrcode_scanner = { module = "com.journeyapps:zxing-android-embedded", version.ref = "qrCode" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 # Testing Libraries
 junit = { group = "junit", name = "junit", version.ref = "junit" }
