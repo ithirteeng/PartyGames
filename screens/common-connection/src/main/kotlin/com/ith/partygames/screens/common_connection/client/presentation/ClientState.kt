@@ -8,7 +8,7 @@ import com.ith.partygames.common.mesh_utils.LocalNodeUiState
 internal data class ClientState(
     val gameType: GameType? = null,
     val localNodeState: LocalNodeUiState = LocalNodeUiState(),
-    val clientState: NodeState = NodeState.Init(),
+    val nodeState: NodeState = NodeState.Init(),
 ) : BaseState
 
 internal sealed interface NodeState {

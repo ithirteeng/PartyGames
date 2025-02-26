@@ -6,9 +6,11 @@ internal sealed interface ClientEvent : BaseEvent {
 
     data object Init : ClientEvent
 
-    data object ConnectToHotspot: ClientEvent
+    data class ConnectToHotspotWithLink(
+        val link: String?,
+    ) : ClientEvent
 
-    data object SendReadyToPlayEvent: ClientEvent
+    data object SendReadyToPlayEvent : ClientEvent
 
-    data object DisconnectFromHotspot: ClientEvent
+    data object DisconnectFromHotspot : ClientEvent
 }

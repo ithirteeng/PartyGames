@@ -23,11 +23,12 @@ import com.ith.partygames.screens.common_connection.client.presentation.ClientEf
 import com.ith.partygames.screens.common_connection.client.presentation.ClientEvent
 import com.ith.partygames.screens.common_connection.client.presentation.ClientState
 import com.ith.partygames.screens.common_connection.client.presentation.ClientViewModel
+import com.ith.partygames.screens.common_connection.client.presentation.NodeState
+import com.ith.partygames.screens.common_connection.common.ui.ErrorTextBox
 import com.ith.partygames.screens.common_connection.common.ui.InfoText
 import com.journeyapps.barcodescanner.ScanContract
-import com.ustadmobile.meshrabiya.vnet.MeshrabiyaConnectLink
+import com.journeyapps.barcodescanner.ScanOptions
 import org.koin.androidx.compose.koinViewModel
-import timber.log.Timber
 
 @Composable
 internal fun CommonConnectionClientScreen(
@@ -64,23 +65,33 @@ private fun Content(
                 )
             }
         }
+        item {
+            when(state.nodeState) {
+                is NodeState.Init -> InitContent(
+                    state = state.nodeState,
+                    processEvent = processEvent
+                )
+                is NodeState.ConnectedToHotspot -> ConnectedToHotspotContent(
+                    state = state,
+                    processEvent = processEvent
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun InitContent(
-    state: ClientState,
+    state: NodeState.Init,
     processEvent: (ClientEvent) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { /*todo: scan QR*/ }
-        ) {
-            Text(text = stringResource(R.string.scan_qr_code))
+        QrCodeScanner(processEvent = processEvent)
+        if (state.error != null) {
+            ErrorTextBox(state.error)
         }
     }
 }
@@ -94,7 +105,7 @@ private fun ConnectedToHotspotContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
-        InfoText(state.localNodeState)
+        InfoText(state.localNodeState.wifiState)
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = { processEvent(ClientEvent.DisconnectFromHotspot) }
@@ -111,27 +122,27 @@ private fun ConnectedToHotspotContent(
 }
 
 @Composable
-private fun QrCodeScanner() {
+private fun QrCodeScanner(
+    processEvent: (ClientEvent) -> Unit
+) {
     val qrCodeScannerLauncher = rememberLauncherForActivityResult(
         contract = ScanContract()
     ) { result ->
         val link = result.contents
-        if (link != null) {
-
-            //todo: send it to viewModel
-            try {
-                Timber.i("VirtualNodeScreen: scanned link: $link")
-                val connectLink = MeshrabiyaConnectLink.parseUri(uri = link)
-                val hotspotConfigVal = connectLink.hotspotConfig
-                if (hotspotConfigVal != null) {
-//                    connectLauncher.launch(hotspotConfigVal)
-                } else {
-                    Timber.e("ERROR: link does not have wificonfig")
+        processEvent(ClientEvent.ConnectToHotspotWithLink(link = link))
+    }
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            qrCodeScannerLauncher.launch(
+                ScanOptions().apply {
+                    setOrientationLocked(false)
+                    setPrompt("Bullshit, big stinky bullshit")
                 }
-            } catch (e: Exception) {
-                Timber.e("VirtualNodeScreen: Invalid link: $link", e)
-            }
+            )
         }
+    ) {
+        Text(stringResource(R.string.scan_qr_code))
     }
 }
 

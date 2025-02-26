@@ -10,6 +10,7 @@ class MainViewModel(
     override fun initState(): MainState = MainState()
 
     override fun processEvent(event: MainEvent) {
+        super.processEvent(event)
         when (event) {
             is MainEvent.BluetoothPermissionGranted -> processBluetoothPermissionGranted(event)
             is MainEvent.WifiPermissionGranted -> processWifiPermissionGranted(event)

@@ -12,6 +12,7 @@ internal class MainViewModel(
     override fun initState(): MainState = MainState.Loading
 
     override fun processEvent(event: MainEvent) {
+        super.processEvent(event)
         when (event) {
             is MainEvent.Init -> init()
         }

@@ -37,10 +37,11 @@ internal class HostViewModel(
     override fun initState(): HostState = HostState()
 
     override fun processEvent(event: HostEvent) {
+        super.processEvent(event)
         when (event) {
-            HostEvent.StartHotspotHostEvent -> processStartHotspot()
+            HostEvent.StartHotspotHostEvent -> startHotspot()
             HostEvent.StartGameHostEvent -> {}
-            HostEvent.StopHotspotEvent -> processStopHotspot()
+            HostEvent.StopHotspotEvent -> stopHotspot()
             HostEvent.Init -> init()
         }
     }
@@ -50,7 +51,7 @@ internal class HostViewModel(
         updateState { oldState -> oldState.copy(gameType = arguments.gameType) }
     }
 
-    private fun processStartHotspot() = viewModelScope.launch {
+    private fun startHotspot() = viewModelScope.launch {
         val response = androidVirtualNode.setWifiHotspotEnabled(
             enabled = true,
             preferredBand = ConnectBand.BAND_2GHZ,
@@ -69,7 +70,7 @@ internal class HostViewModel(
         }
     }
 
-    private fun processStopHotspot() {
+    private fun stopHotspot() {
         viewModelScope.launch {
             androidVirtualNode.setWifiHotspotEnabled(enabled = false)
             updateState { oldState ->

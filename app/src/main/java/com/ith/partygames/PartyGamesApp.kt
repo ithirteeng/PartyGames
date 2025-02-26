@@ -1,7 +1,6 @@
 package com.ith.partygames
 
 import android.app.Application
-import com.google.zxing.client.android.BuildConfig
 import com.ith.partygames.di.koinModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -19,8 +18,6 @@ class PartyGamesApp : Application() {
             modules(koinModules)
         }
 
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
+        Timber.plant(Timber.DebugTree())
     }
 }
