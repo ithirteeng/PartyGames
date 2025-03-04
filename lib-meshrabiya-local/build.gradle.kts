@@ -24,6 +24,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":common:games"))
+
     implementation(stack.androidx.core.ktx)
     implementation(stack.androidx.appcompat)
     implementation(stack.rawhttp.core)

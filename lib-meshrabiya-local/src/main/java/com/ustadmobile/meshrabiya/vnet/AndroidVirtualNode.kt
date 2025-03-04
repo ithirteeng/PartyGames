@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.ith.partygames.common.games.GameType
 import com.ustadmobile.meshrabiya.log.MNetLogger
 import com.ustadmobile.meshrabiya.log.MNetLoggerStdout
 import com.ustadmobile.meshrabiya.vnet.bluetooth.MeshrabiyaBluetoothState
@@ -33,7 +34,7 @@ class AndroidVirtualNode(
     dataStore: DataStore<Preferences>,
     address: InetAddress = randomApipaInetAddr(),
     config: NodeConfig = NodeConfig.DEFAULT_CONFIG,
-    deviceName: String? = null
+    deviceName: String? = null,
 ) : VirtualNode(
     port = port,
     logger = logger,
@@ -43,10 +44,11 @@ class AndroidVirtualNode(
     deviceName = deviceName
 ) {
 
+    private val gameTypeState = MutableStateFlow(GameType.UNKNOWN)
+
     private val bluetoothManager: BluetoothManager by lazy {
         appContext.getSystemService(BluetoothManager::class.java)
     }
-
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy {
         bluetoothManager.adapter
@@ -76,7 +78,12 @@ class AndroidVirtualNode(
         dataStore = dataStore,
         json = json,
         onNewWifiConnectionListener = newWifiConnectionListener,
+        getGameType = { gameTypeState.value }
     )
+
+    fun setGameType(gameType: GameType) {
+        gameTypeState.update { gameType }
+    }
 
     private val _bluetoothState = MutableStateFlow(MeshrabiyaBluetoothState())
 
@@ -147,9 +154,7 @@ class AndroidVirtualNode(
         }
     }
 
-    suspend fun connectAsStation(
-        config: WifiConnectConfig,
-    ) {
+    suspend fun connectAsStation(config: WifiConnectConfig) {
         meshrabiyaWifiManager.connectToHotspot(config)
     }
 

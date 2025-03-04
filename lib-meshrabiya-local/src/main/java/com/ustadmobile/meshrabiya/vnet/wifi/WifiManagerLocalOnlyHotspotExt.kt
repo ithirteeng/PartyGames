@@ -6,6 +6,7 @@ import android.net.wifi.WifiManager.LocalOnlyHotspotCallback
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.ith.partygames.common.games.GameType
 import com.ustadmobile.meshrabiya.ext.prettyPrint
 import com.ustadmobile.meshrabiya.ext.ssidCompat
 import com.ustadmobile.meshrabiya.log.MNetLogger
@@ -113,6 +114,7 @@ fun WifiManager.LocalOnlyHotspotReservation.toLocalHotspotConfig(
     nodeVirtualAddr: Int,
     port: Int,
     logger: MNetLogger? = null,
+    gameType: GameType,
 ): WifiConnectConfig {
     return if (Build.VERSION.SDK_INT >= 30) {
         val softApConfig = softApConfiguration
@@ -134,6 +136,8 @@ fun WifiManager.LocalOnlyHotspotReservation.toLocalHotspotConfig(
                 hotspotType = HotspotType.LOCALONLY_HOTSPOT,
                 bssid = bssid?.toString(),
                 linkLocalAddr = null,
+                gameType = gameType
+
             )
         } else {
             logger?.invoke(
@@ -164,6 +168,7 @@ fun WifiManager.LocalOnlyHotspotReservation.toLocalHotspotConfig(
                 hotspotType = HotspotType.LOCALONLY_HOTSPOT,
                 linkLocalAddr = null,
                 bssid = bssid,
+                gameType = gameType
             )
         } else {
             logger?.invoke(

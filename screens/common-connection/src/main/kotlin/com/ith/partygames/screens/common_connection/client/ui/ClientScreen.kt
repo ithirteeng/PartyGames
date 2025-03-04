@@ -116,7 +116,7 @@ private fun ConnectedToHotspotContent(
             modifier = Modifier.fillMaxWidth(),
             onClick = { processEvent(ClientEvent.SendReadyToPlayEvent) }
         ) {
-            Text(text = stringResource(R.string.disconnect_from_hotspot))
+            Text(text = stringResource(R.string.ready_to_play))
         }
     }
 }

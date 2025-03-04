@@ -1,5 +1,6 @@
 package com.ustadmobile.meshrabiya.vnet.wifi
 
+import com.ith.partygames.common.games.GameType
 import com.ustadmobile.meshrabiya.ext.getBoolean
 import com.ustadmobile.meshrabiya.ext.getStringOrThrow
 import com.ustadmobile.meshrabiya.ext.putBoolean
@@ -50,6 +51,7 @@ data class WifiConnectConfig(
     val persistenceType: HotspotPersistenceType = HotspotPersistenceType.NONE,
     val band: ConnectBand = ConnectBand.BAND_UNKNOWN,
     val bssid: String? = null,
+    val gameType: GameType,
 ) {
 
     private val ssidBytes: ByteArray? by lazy {
@@ -67,14 +69,14 @@ data class WifiConnectConfig(
      * port: 4 bytes
      * hotspotType: 1 byte
      * band: 1 byte
+     * gameType: 1 byte
      * persistenceType: 1 byte
      * linkLocalAddrPresent: 1 byte (0 or 1)
      * linkLocalAddr: 16 bytes (IPv6 address)
-     *
      */
     val sizeInBytes: Int
         get() = 4 + (4 + (ssidBytes?.size ?: 0)) + (4 + (passphraseBytes?.size
-            ?: 0)) + 4 + 1 + 1 + 1 + 1 + 16
+            ?: 0)) + 4 + 1 + 1 + 1 + 1 + 1 + 16
 
     /**
      * We need to provide the BSSID when connecting on Android 10+ to avoid a dialog on
@@ -117,6 +119,7 @@ data class WifiConnectConfig(
             .putInt(port)
             .put(hotspotType.flag)
             .put(band.flag)
+            .put(gameType.value)
             .put(persistenceType.flag)
             .putBoolean(linkLocalAddr != null)
             .apply {
@@ -149,6 +152,7 @@ data class WifiConnectConfig(
             val port = byteBuf.int
             val hotspotType = HotspotType.fromFlag(byteBuf.get())
             val connectBand = ConnectBand.fromFlag(byteBuf.get())
+            val gameType = GameType.fromByteValue(byteBuf.get())
             val persistenceType = HotspotPersistenceType.fromFlag(byteBuf.get())
             val hasLinkLocalAddr = byteBuf.getBoolean()
             val linkLocalAddr = if (hasLinkLocalAddr) {
@@ -165,7 +169,8 @@ data class WifiConnectConfig(
                 hotspotType = hotspotType,
                 band = connectBand,
                 persistenceType = persistenceType,
-                linkLocalAddr = linkLocalAddr
+                linkLocalAddr = linkLocalAddr,
+                gameType = gameType
             )
 
         }
