@@ -7,6 +7,7 @@ import com.ith.partygames.common.architecture.ComplexViewModel
 import com.ith.partygames.screens.common_connection.host.navigation.HostRoute
 import com.ustadmobile.meshrabiya.vnet.AndroidVirtualNode
 import com.ustadmobile.meshrabiya.vnet.MeshrabiyaConnectLink
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -40,14 +41,15 @@ internal class ClientViewModel(
         when (event) {
             is ClientEvent.Init -> init()
             is ClientEvent.ConnectToHotspotWithLink -> connectToHotspotWithLink(event)
-            is ClientEvent.DisconnectFromHotspot -> TODO()
-            is ClientEvent.SendReadyToPlayEvent -> TODO()
+            is ClientEvent.DisconnectFromHotspot -> {/*TODO()*/ }
+            is ClientEvent.SendReadyToPlayEvent -> {/*TODO()*/ }
         }
     }
 
     private fun init() {
         val arguments = savedStateHandle.toRoute<HostRoute>()
         updateState { oldState -> oldState.copy(gameType = arguments.gameType) }
+        androidVirtualNode.setGameType(arguments.gameType)
     }
 
     private fun connectToHotspotWithLink(event: ClientEvent.ConnectToHotspotWithLink) =
@@ -56,7 +58,8 @@ internal class ClientViewModel(
                 if (event.link != null) {
                     val connectLink = MeshrabiyaConnectLink.parseUri(uri = event.link)
                     val hotspotConfig = connectLink.hotspotConfig
-                    if (hotspotConfig != null) {
+                    if (hotspotConfig != null /*todo: add check on gameType compatibility*/) {
+                        Timber.d("config: $hotspotConfig")
                         androidVirtualNode.connectAsStation(hotspotConfig)
                         updateState { oldState -> oldState.copy(nodeState = NodeState.ConnectedToHotspot) }
                     } else {
@@ -70,6 +73,12 @@ internal class ClientViewModel(
                 showError("got error: " + e.message.toString())
             }
         }
+
+    private fun disconnectFromHotspot() {
+        viewModelScope.launch(Dispatchers.Main) {
+            androidVirtualNode.disconnectWifiStation()
+        }
+    }
 
     private fun showError(message: String) {
         sendEffect(ClientEffect.ShowErrorMessage(message))

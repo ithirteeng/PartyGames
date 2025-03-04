@@ -10,4 +10,5 @@
     <string name="connect_to_hotspot">Connect To Hotspot</string>
     <string name="scan_qr_code">Scan QR-Code</string>
     <string name="disconnect_from_hotspot">Disconnect From Hotspot</string>
+    <string name="ready_to_play">Ready To Play</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.ith.partygames.common.games.GameType
 import com.ustadmobile.meshrabiya.ext.addressToDotNotation
 import com.ustadmobile.meshrabiya.ext.connectBand
 import com.ustadmobile.meshrabiya.ext.encodeAsHex
@@ -56,6 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * Note: To discover the WifiDirect group service, the service request must use a blank .newInstance() !
  *
+ * gameType is used to define type of game and forbid connections from another games
  */
 class WifiDirectManager(
     private val appContext: Context,
@@ -65,6 +67,7 @@ class WifiDirectManager(
     private val dataStore: DataStore<Preferences>,
     private val json: Json,
     private val ioExecutorService: ExecutorService,
+    private val getGameType: () -> GameType,
 ) : WifiP2pManager.ChannelListener, Closeable {
 
     fun interface OnBeforeGroupStart {
@@ -98,7 +101,9 @@ class WifiDirectManager(
     private val groupUpdateMutex = Mutex()
 
     @RequiresApi(29)
-    suspend fun getOrCreateWifiGroupFromPrefs(): WifiConnectConfig {
+    suspend fun getOrCreateWifiGroupFromPrefs(
+        gameType: GameType,
+    ): WifiConnectConfig {
         val existingConfig = dataStore.data.map {
             it[dataStoreConfigKey]
         }.first()?.let {
@@ -123,6 +128,7 @@ class WifiDirectManager(
             hotspotType = HotspotType.WIFIDIRECT_GROUP,
             persistenceType = HotspotPersistenceType.FULL,
             linkLocalAddr = unspecifiedIpv6Address(),
+            gameType = gameType
         )
 
         dataStore.edit {
@@ -168,7 +174,7 @@ class WifiDirectManager(
                         "wifi p2p connection changed action: group=${extraGroup?.toPrettyString()}",
                         null
                     )
-                    onNewWifiP2pGroupInfoReceived(extraGroup)
+                    onNewWifiP2pGroupInfoReceived(getGameType(), extraGroup)
                 }
             }
         }
@@ -179,7 +185,10 @@ class WifiDirectManager(
      * This function can be called by the WIFI_P2P_CONNECTION_CHANGED_ACTION or the
      * startWifiDirectGroup function if it requests group information and finds a group already exists
      */
-    private fun onNewWifiP2pGroupInfoReceived(group: WifiP2pGroup?) {
+    private fun onNewWifiP2pGroupInfoReceived(
+        gameType: GameType,
+        group: WifiP2pGroup?
+    ) {
         val ssid = group?.networkName
 
         val passphrase = group?.passphrase
@@ -215,7 +224,8 @@ class WifiDirectManager(
                         } else {
                             HotspotPersistenceType.NONE
                         },
-                        hotspotType = HotspotType.WIFIDIRECT_GROUP
+                        hotspotType = HotspotType.WIFIDIRECT_GROUP,
+                        gameType = gameType
                     )
                 } else {
                     null
@@ -278,7 +288,7 @@ class WifiDirectManager(
                     "$logPrefix: init: Group already exists on startup: ${existingGroupInfo.toPrettyString()}",
                     null
                 )
-                onNewWifiP2pGroupInfoReceived(existingGroupInfo)
+                onNewWifiP2pGroupInfoReceived(getGameType(), existingGroupInfo)
             }
         }
     }
@@ -355,6 +365,7 @@ class WifiDirectManager(
 
     internal suspend fun startWifiDirectGroup(
         preferredBand: ConnectBand,
+        gameType: GameType,
     ): Boolean {
         logger(Log.DEBUG, "$logPrefix startWifiDirectGroup", null)
         onBeforeGroupStart?.onBeforeGroupStart()
@@ -369,7 +380,7 @@ class WifiDirectManager(
                 "$logPrefix: startWifiDirectGroup: Group already exists: ${existingGroupInfo.toPrettyString()}",
                 null
             )
-            onNewWifiP2pGroupInfoReceived(existingGroupInfo)
+            onNewWifiP2pGroupInfoReceived(gameType, existingGroupInfo)
         } else {
             logger(Log.DEBUG, "$logPrefix startWifiDirectGroup: Requesting WifiP2PGroup", null)
             try {
@@ -378,7 +389,7 @@ class WifiDirectManager(
                 }
 
                 if (Build.VERSION.SDK_INT >= 29) {
-                    val config = getOrCreateWifiGroupFromPrefs()
+                    val config = getOrCreateWifiGroupFromPrefs(gameType)
                     val p2pConfig = WifiP2pConfig.Builder()
                         .enablePersistentMode(true)
                         .setNetworkName(config.ssid)

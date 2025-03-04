@@ -16,6 +16,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.ith.partygames.common.games.GameType
 import com.ustadmobile.meshrabiya.ext.addOrLookupNetwork
 import com.ustadmobile.meshrabiya.ext.addressToDotNotation
 import com.ustadmobile.meshrabiya.ext.bssidDataStore
@@ -74,6 +75,7 @@ class MeshrabiyaWifiManagerAndroid(
     private val onNewWifiConnectionListener: OnNewWifiConnectionListener = OnNewWifiConnectionListener { },
     private val dataStore: DataStore<Preferences>,
     private val json: Json,
+    private val getGameType: () -> GameType,
     private val wifiDirectManager: WifiDirectManager = WifiDirectManager(
         appContext = appContext,
         logger = logger,
@@ -82,6 +84,7 @@ class MeshrabiyaWifiManagerAndroid(
         dataStore = dataStore,
         json = json,
         ioExecutorService = ioExecutor,
+        getGameType = getGameType
     ),
 
     private val localOnlyHotspotManager: LocalOnlyHotspotManager = LocalOnlyHotspotManager(
@@ -91,6 +94,7 @@ class MeshrabiyaWifiManagerAndroid(
         localNodeAddr = localNodeAddr,
         router = router,
         dataStore = dataStore,
+        getGameType = getGameType
     )
 ) : Closeable, MeshrabiyaWifiManager {
 
@@ -270,7 +274,10 @@ class MeshrabiyaWifiManagerAndroid(
             when (prevState.hotspotTypeToCreate?.overrideWithRequestTypeIfSpecified()) {
                 HotspotType.WIFIDIRECT_GROUP -> {
                     localOnlyHotspotManager.stopLocalOnlyHotspot(waitForStop = true)
-                    wifiDirectManager.startWifiDirectGroup(request.preferredBand)
+                    wifiDirectManager.startWifiDirectGroup(
+                        request.preferredBand,
+                        gameType = getGameType()
+                    )
                 }
 
                 HotspotType.LOCALONLY_HOTSPOT -> {

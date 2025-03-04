@@ -10,6 +10,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.ith.partygames.common.games.GameType
 import com.ustadmobile.meshrabiya.ext.encodeAsHex
 import com.ustadmobile.meshrabiya.ext.prettyPrint
 import com.ustadmobile.meshrabiya.log.MNetLogger
@@ -33,6 +34,7 @@ class LocalOnlyHotspotManager(
     private val localNodeAddr: Int,
     private val router: VirtualRouter,
     private val dataStore: DataStore<Preferences>,
+    private val getGameType: () -> GameType,
 ) {
 
     private val logPrefix: String = "[LocalOnlyHotspotManager: $name]"
@@ -53,6 +55,7 @@ class LocalOnlyHotspotManager(
                 nodeVirtualAddr = localNodeAddr,
                 port = router.localDatagramPort,
                 logger = logger,
+                gameType = getGameType()
             )
             logger(
                 Log.DEBUG,

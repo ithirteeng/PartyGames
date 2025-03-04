@@ -49,6 +49,7 @@ internal class HostViewModel(
     private fun init() {
         val arguments = savedStateHandle.toRoute<HostRoute>()
         updateState { oldState -> oldState.copy(gameType = arguments.gameType) }
+        androidVirtualNode.setGameType(arguments.gameType)
     }
 
     private fun startHotspot() = viewModelScope.launch {
