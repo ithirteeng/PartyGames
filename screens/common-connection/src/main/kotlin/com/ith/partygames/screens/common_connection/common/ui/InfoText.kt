@@ -19,7 +19,8 @@ internal fun InfoText(state: LocalNodeUiState) {
                 "Passphrase: ${state.wifiState?.connectConfig?.passphrase}\n" +
                 "LinkLocal: ${state.wifiState?.connectConfig?.linkLocalAddr}\n" +
                 "MAC Address: ${state.wifiState?.connectConfig?.bssid/*: state.wifiState?.connectConfig?.linkLocalToMacAddress*/}\n" +
-                "Port: ${state.wifiState?.connectConfig?.port}\n"
+                "Port: ${state.wifiState?.connectConfig?.port}\n" +
+                "IP: ${state.localAddress.addressToDotNotation()}\n"
     )
 }
 

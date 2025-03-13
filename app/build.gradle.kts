@@ -47,6 +47,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/*"
         }
     }
 }
@@ -54,8 +55,10 @@ android {
 dependencies {
     implementation(project(":common:architecture"))
     implementation(project(":common:data"))
+    implementation(project(":common:server"))
     implementation(project(":common:games"))
     implementation(project(":common:ui"))
+    implementation(project(":common:mesh-utils"))
 
     implementation(project(":lib-meshrabiya-local"))
 

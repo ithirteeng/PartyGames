@@ -4,9 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ith.partygames.common.architecture.ComplexViewModel
+import com.ith.partygames.screens.common_connection.host.domain.HostRepository
 import com.ith.partygames.screens.common_connection.host.navigation.HostRoute
 import com.ustadmobile.meshrabiya.vnet.AndroidVirtualNode
 import com.ustadmobile.meshrabiya.vnet.MeshrabiyaConnectLink
+import com.ustadmobile.meshrabiya.vnet.wifi.WifiConnectConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -14,6 +16,7 @@ import timber.log.Timber
 internal class ClientViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val androidVirtualNode: AndroidVirtualNode,
+    private val repository: HostRepository,
 ) : ComplexViewModel<ClientState, ClientEvent, ClientEffect>() {
 
     init {
@@ -41,12 +44,21 @@ internal class ClientViewModel(
         when (event) {
             is ClientEvent.Init -> init()
             is ClientEvent.ConnectToHotspotWithLink -> connectToHotspotWithLink(event)
-            is ClientEvent.DisconnectFromHotspot -> {/*TODO()*/ }
-            is ClientEvent.SendReadyToPlayEvent -> {/*TODO()*/ }
+            is ClientEvent.DisconnectFromHotspot -> {/*TODO()*/
+            }
+
+            is ClientEvent.SendReadyToPlayEvent -> viewModelScope.launch(Dispatchers.IO) {
+                val wifiStationState = state.value.localNodeState.wifiState?.wifiStationState ?: return@launch
+                val toNodeAddress = wifiStationState.config?.nodeVirtualAddr ?: return@launch
+                val toPort = wifiStationState.config?.port ?: return@launch
+
+            }
         }
     }
 
     private fun init() {
+        repository.startServer()
+
         val arguments = savedStateHandle.toRoute<HostRoute>()
         updateState { oldState -> oldState.copy(gameType = arguments.gameType) }
         androidVirtualNode.setGameType(arguments.gameType)
@@ -58,15 +70,16 @@ internal class ClientViewModel(
                 if (event.link != null) {
                     val connectLink = MeshrabiyaConnectLink.parseUri(uri = event.link)
                     val hotspotConfig = connectLink.hotspotConfig
-                    if (hotspotConfig != null /*todo: add check on gameType compatibility*/) {
+                    if (hotspotConfig != null) {
                         Timber.d("config: $hotspotConfig")
-                        androidVirtualNode.connectAsStation(hotspotConfig)
-                        updateState { oldState -> oldState.copy(nodeState = NodeState.ConnectedToHotspot) }
+                        tryConnectToHost(hotspotConfig)
                     } else {
                         showError("Hotspot config is null!")
+                        return@launch
                     }
                 } else {
                     showError("Connect link is null!")
+                    return@launch
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Caught exception while connecting")
@@ -74,10 +87,17 @@ internal class ClientViewModel(
             }
         }
 
-    private fun disconnectFromHotspot() {
-        viewModelScope.launch(Dispatchers.Main) {
-            androidVirtualNode.disconnectWifiStation()
+    private suspend fun tryConnectToHost(wifiConnectConfig: WifiConnectConfig) {
+        if (wifiConnectConfig.gameType != state.value.gameType) {
+            showError("Wrong Game!")
+        } else {
+            androidVirtualNode.connectAsStation(wifiConnectConfig)
+            updateState { oldState -> oldState.copy(nodeState = NodeState.ConnectedToHotspot) }
         }
+    }
+
+    private fun disconnectFromHotspot() = viewModelScope.launch(Dispatchers.Main) {
+        androidVirtualNode.disconnectWifiStation()
     }
 
     private fun showError(message: String) {

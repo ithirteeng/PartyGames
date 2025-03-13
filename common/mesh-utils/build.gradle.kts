@@ -9,6 +9,4 @@ android {
 
 dependencies {
     api(project(":lib-meshrabiya-local"))
-
-//    api(stack.kotlinx.serialization.json)
 }

@@ -1,6 +1,7 @@
 package com.ith.partygames.common.mesh_utils
 
 import android.os.Build
+import com.ustadmobile.meshrabiya.vnet.VirtualNode
 import com.ustadmobile.meshrabiya.vnet.bluetooth.MeshrabiyaBluetoothState
 import com.ustadmobile.meshrabiya.vnet.wifi.ConnectBand
 import com.ustadmobile.meshrabiya.vnet.wifi.HotspotType
@@ -19,6 +20,7 @@ data class LocalNodeUiState(
     val wifiState: MeshrabiyaWifiState? = null,
     val bluetoothState: MeshrabiyaBluetoothState? = null,
     val connectUri: String? = null,
+    val nodes: Map<Int, VirtualNode.LastOriginatorMessage> = emptyMap(),
 ) {
 
     val incomingConnectionsEnabled: Boolean

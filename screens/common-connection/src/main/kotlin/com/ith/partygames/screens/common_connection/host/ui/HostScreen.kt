@@ -7,9 +7,10 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +34,10 @@ import com.ith.partygames.screens.common_connection.host.presentation.HostState
 import com.ith.partygames.screens.common_connection.host.presentation.HostViewModel
 import com.ith.partygames.screens.common_connection.host.presentation.HotspotState
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import com.ustadmobile.meshrabiya.ext.addressToDotNotation
+import com.ustadmobile.meshrabiya.vnet.VirtualNode
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 import kotlin.math.min
 
 @Composable
@@ -42,6 +46,7 @@ internal fun HostScreen(
 ) {
     val context = LocalContext.current
     LaunchedEffect(null) {
+        Timber.tag("BLYAT").d("process event")
         viewModel.processEvent(HostEvent.Init)
         observeEffects(context, viewModel)
     }
@@ -58,24 +63,19 @@ private fun Content(
     processEvent: (event: HostEvent) -> Unit,
     state: HostState
 ) {
-    LazyColumn(
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 32.dp)
     ) {
-        item {
-            if (state.gameType != null) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = state.gameType.name
-                )
-            }
+        if (state.gameType != null) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = state.gameType.name
+            )
         }
 
-        item {
-            when (state.hotspotState) {
-                is HotspotState.Init -> InitContent(processEvent, state.hotspotState)
-                is HotspotState.HotspotActivated -> HotspotActivatedContent(processEvent, state)
-            }
+        when (state.hotspotState) {
+            is HotspotState.Init -> InitContent(processEvent, state.hotspotState)
+            is HotspotState.HotspotActivated -> HotspotActivatedContent(processEvent, state)
         }
     }
 }
@@ -106,47 +106,75 @@ private fun HotspotActivatedContent(
     val barcodeEncoder = remember {
         BarcodeEncoder()
     }
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(space = 16.dp)
+            ) {
+                InfoText(state.localNodeState)
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { processEvent(HostEvent.StopHotspotEvent) }
+                ) {
+                    Text(text = stringResource(R.string.stop_hotspot))
+                }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(space = 16.dp)
-    ) {
-        InfoText(state.localNodeState)
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { processEvent(HostEvent.StopHotspotEvent) }
-        ) {
-            Text(text = stringResource(R.string.stop_hotspot))
-        }
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { processEvent(HostEvent.StartGameHostEvent) }
+                ) {
+                    Text(text = stringResource(R.string.start_game))
+                }
 
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { processEvent(HostEvent.StartGameHostEvent) }
-        ) {
-            Text(text = stringResource(R.string.start_game))
-        }
+                if (state.localNodeState.connectUri != null && state.localNodeState.incomingConnectionsEnabled) {
+                    val config = LocalConfiguration.current
+                    val screenWidth = config.screenWidthDp
+                    val screenWidthPx = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        screenWidth.toFloat(),
+                        Resources.getSystem().displayMetrics,
+                    )
+                    val width = min(screenWidthPx.toInt(), 900)
 
-        if (state.localNodeState.connectUri != null && state.localNodeState.incomingConnectionsEnabled) {
-            val config = LocalConfiguration.current
-            val screenWidth = config.screenWidthDp
-            val screenWidthPx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                screenWidth.toFloat(),
-                Resources.getSystem().displayMetrics,
-            )
-            val width = min(screenWidthPx.toInt(), 900)
+                    val qrCodeBitmap = remember(state.localNodeState.connectUri) {
+                        barcodeEncoder.encodeBitmap(
+                            state.localNodeState.connectUri, BarcodeFormat.QR_CODE, width, width
+                        ).asImageBitmap()
+                    }
 
-            val qrCodeBitmap = remember(state.localNodeState.connectUri) {
-                barcodeEncoder.encodeBitmap(
-                    state.localNodeState.connectUri, BarcodeFormat.QR_CODE, width, width
-                ).asImageBitmap()
+                    Image(
+                        bitmap = qrCodeBitmap,
+                        contentDescription = null
+                    )
+                }
             }
+        }
 
-            Image(
-                bitmap = qrCodeBitmap,
-                contentDescription = null
+        items(
+            items = state.localNodeState.nodes.entries.toList(),
+            key = { it.key }
+        ) { nodeEntry ->
+            NodeListItem(
+                nodeAddr = nodeEntry.key,
+                nodeEntry = nodeEntry.value
             )
         }
+    }
+}
+
+@Composable
+fun NodeListItem(
+    nodeAddr: Int,
+    nodeEntry: VirtualNode.LastOriginatorMessage,
+    onClick: (() -> Unit)? = null,
+) {
+    Column {
+        Text(nodeAddr.addressToDotNotation() + ": ${nodeEntry.originatorMessage.connectConfig ?: "popa"}: ${nodeEntry.deviceName ?: "popa"}")
+        Text(
+            "Ping ${nodeEntry.originatorMessage.pingTimeSum}ms " +
+                    " Hops: ${nodeEntry.hopCount} "
+        )
     }
 }
 

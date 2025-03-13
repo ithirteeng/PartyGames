@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ith.partygames.common.architecture.ComplexViewModel
+import com.ith.partygames.screens.common_connection.host.domain.HostRepository
 import com.ith.partygames.screens.common_connection.host.navigation.HostRoute
 import com.ustadmobile.meshrabiya.vnet.AndroidVirtualNode
 import com.ustadmobile.meshrabiya.vnet.wifi.ConnectBand
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 internal class HostViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val androidVirtualNode: AndroidVirtualNode,
+    private val repository: HostRepository,
 ) : ComplexViewModel<HostState, HostEvent, HostEffect>() {
 
     init {
@@ -27,6 +29,7 @@ internal class HostViewModel(
                             wifiState = nodeState.wifiState,
                             bluetoothState = nodeState.bluetoothState,
                             connectUri = nodeState.connectUri,
+                            nodes = nodeState.originatorMessages
                         )
                     )
                 }
@@ -47,6 +50,8 @@ internal class HostViewModel(
     }
 
     private fun init() {
+        repository.startServer()
+
         val arguments = savedStateHandle.toRoute<HostRoute>()
         updateState { oldState -> oldState.copy(gameType = arguments.gameType) }
         androidVirtualNode.setGameType(arguments.gameType)
@@ -55,7 +60,7 @@ internal class HostViewModel(
     private fun startHotspot() = viewModelScope.launch {
         val response = androidVirtualNode.setWifiHotspotEnabled(
             enabled = true,
-            preferredBand = ConnectBand.BAND_2GHZ,
+            preferredBand = ConnectBand.BAND_5GHZ,
             hotspotType = HotspotType.AUTO
         )
         if (response != null && response.errorCode != 0) {

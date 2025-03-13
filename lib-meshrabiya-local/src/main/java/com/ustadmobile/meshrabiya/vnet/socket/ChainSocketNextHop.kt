@@ -8,5 +8,4 @@ data class ChainSocketNextHop(
     val port: Int,
     val isFinalDest: Boolean,
     val network: Network?,
-) {
-}
+)

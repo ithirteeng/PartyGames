@@ -9,5 +9,4 @@ fun interface ReturnPathSocketFactory {
         destAddress: InetAddress,
         port: Int,
     ): DatagramSocket
-
 }

@@ -6,7 +6,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -106,6 +108,8 @@ private fun ConnectedToHotspotContent(
         verticalArrangement = Arrangement.spacedBy(space = 16.dp)
     ) {
         InfoText(state.localNodeState.wifiState)
+        Spacer(Modifier.fillMaxWidth().height(2.dp))
+        InfoText(state.localNodeState)
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = { processEvent(ClientEvent.DisconnectFromHotspot) }

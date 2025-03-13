@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":common:mesh-utils"))
     implementation(project(":common:ui"))
     implementation(project(":common:data"))
+    implementation(project(":common:server"))
 
     implementation(stack.koin.core)
     implementation(stack.koin.android)
