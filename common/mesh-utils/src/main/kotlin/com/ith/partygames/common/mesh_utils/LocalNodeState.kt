@@ -7,7 +7,7 @@ import com.ustadmobile.meshrabiya.vnet.wifi.ConnectBand
 import com.ustadmobile.meshrabiya.vnet.wifi.HotspotType
 import com.ustadmobile.meshrabiya.vnet.wifi.state.MeshrabiyaWifiState
 
-data class LocalNodeUiState(
+data class LocalNodeState(
     val localAddress: Int = 0,
     val deviceName: String? = null,
     val bandOptions: List<ConnectBand> = listOf(ConnectBand.BAND_2GHZ),

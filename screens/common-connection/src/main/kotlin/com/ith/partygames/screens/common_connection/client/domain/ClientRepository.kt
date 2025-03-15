@@ -1,6 +1,11 @@
 package com.ith.partygames.screens.common_connection.client.domain
 
+import java.net.InetAddress
+
 internal interface ClientRepository {
 
-    fun startServer()
+    suspend fun sendReadyToPlayEvent(
+        toAddress: InetAddress,
+        fromAddress: InetAddress,
+    ): Result<String?>
 }

@@ -2,12 +2,14 @@ package com.ith.partygames.screens.common_connection.host.presentation
 
 import com.ith.partygames.common.architecture.BaseState
 import com.ith.partygames.common.games.GameType
-import com.ith.partygames.common.mesh_utils.LocalNodeUiState
+import com.ith.partygames.common.mesh_utils.LocalNodeState
+import com.ith.partygames.screens.common_connection.host.data.model.ClientNodeState
 
 
 internal data class HostState(
     val gameType: GameType? = null,
-    val localNodeState: LocalNodeUiState = LocalNodeUiState(),
+    val localNodeState: LocalNodeState = LocalNodeState(),
+    val clientNodes: List<ClientNodeState> = emptyList(),
     val hotspotState: HotspotState = HotspotState.Init(),
 ) : BaseState
 

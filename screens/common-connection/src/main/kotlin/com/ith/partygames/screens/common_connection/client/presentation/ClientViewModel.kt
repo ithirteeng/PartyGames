@@ -4,8 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ith.partygames.common.architecture.ComplexViewModel
-import com.ith.partygames.screens.common_connection.host.domain.HostRepository
+import com.ith.partygames.screens.common_connection.client.domain.ClientRepository
 import com.ith.partygames.screens.common_connection.host.navigation.HostRoute
+import com.ustadmobile.meshrabiya.ext.asInetAddress
 import com.ustadmobile.meshrabiya.vnet.AndroidVirtualNode
 import com.ustadmobile.meshrabiya.vnet.MeshrabiyaConnectLink
 import com.ustadmobile.meshrabiya.vnet.wifi.WifiConnectConfig
@@ -16,7 +17,7 @@ import timber.log.Timber
 internal class ClientViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val androidVirtualNode: AndroidVirtualNode,
-    private val repository: HostRepository,
+    private val repository: ClientRepository,
 ) : ComplexViewModel<ClientState, ClientEvent, ClientEffect>() {
 
     init {
@@ -44,13 +45,22 @@ internal class ClientViewModel(
         when (event) {
             is ClientEvent.Init -> init()
             is ClientEvent.ConnectToHotspotWithLink -> connectToHotspotWithLink(event)
-            is ClientEvent.DisconnectFromHotspot -> {/*TODO()*/
-            }
+            is ClientEvent.DisconnectFromHotspot -> {/*TODO()*/ }
 
             is ClientEvent.SendReadyToPlayEvent -> viewModelScope.launch(Dispatchers.IO) {
-                val wifiStationState = state.value.localNodeState.wifiState?.wifiStationState ?: return@launch
-                val toNodeAddress = wifiStationState.config?.nodeVirtualAddr ?: return@launch
-                val toPort = wifiStationState.config?.port ?: return@launch
+                val wifiStationState =
+                    state.value.localNodeState.wifiState?.wifiStationState ?: return@launch
+                val toAddress = wifiStationState.config?.nodeVirtualAddr ?: return@launch
+                val fromAddress = androidVirtualNode.address
+
+                repository.sendReadyToPlayEvent(
+                    toAddress = toAddress.asInetAddress(),
+                    fromAddress = fromAddress
+                ).onSuccess { message ->
+                    sendEffect(ClientEffect.ShowErrorMessage(message))
+                }.onFailure { error ->
+                    sendEffect(ClientEffect.ShowErrorMessage(error.message))
+                }
 
             }
         }

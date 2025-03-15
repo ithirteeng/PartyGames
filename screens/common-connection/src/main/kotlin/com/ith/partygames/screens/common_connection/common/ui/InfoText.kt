@@ -5,14 +5,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ith.partygames.common.mesh_utils.LocalNodeUiState
+import com.ith.partygames.common.mesh_utils.LocalNodeState
 import com.ith.partygames.common.ui.components.LoadingIndicator
 import com.ustadmobile.meshrabiya.ext.addressToDotNotation
 import com.ustadmobile.meshrabiya.vnet.wifi.state.MeshrabiyaWifiState
 import com.ustadmobile.meshrabiya.vnet.wifi.state.WifiStationState
 
 @Composable
-internal fun InfoText(state: LocalNodeUiState) {
+internal fun InfoText(state: LocalNodeState) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         text = "SSID: ${state.wifiState?.connectConfig?.ssid} (${state.wifiState?.connectConfig?.band})\n" +

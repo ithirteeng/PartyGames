@@ -9,11 +9,13 @@ android {
 
 dependencies {
     api(stack.okhttp)
-    implementation(project(":common:mesh-utils"))
+    api(stack.nano.httpd)
 
-    implementation(stack.koin.core)
-    implementation(stack.koin.android)
-    implementation(stack.kotlinx.serialization.json)
-    implementation(stack.androidx.datastore.preferences)
     implementation(stack.androidx.datastore)
+    implementation(stack.androidx.datastore.preferences)
+    implementation(stack.koin.android)
+    implementation(stack.koin.core)
+    implementation(stack.kotlinx.serialization.json)
+
+    implementation(project(":common:mesh-utils"))
 }

@@ -1,4 +1,4 @@
-package com.ith.partygames.common.data.server
+package com.ith.partygames.common.data.utils
 
 import java.net.InetAddress
 
@@ -15,11 +15,11 @@ class UrlBuilder {
 
     fun port(port: Int) = apply { this.port = port }
 
-    fun path(segment: String) = apply { pathSegments.add(segment) }
+    fun path(vararg segments: String) = apply { pathSegments.addAll(segments) }
 
     fun pathParam(pathParam: String) = apply { pathSegments.add("{$pathParam}") }
 
-    fun queryParam(key: String, value: String) = apply { queryParams[key] = value }
+    fun queryParam(key: String, value: String?) = apply { queryParams[key] = value.toString() }
 
     fun build(): String {
         require(host.isNotEmpty()) { "Host must not be empty" }
@@ -37,6 +37,10 @@ class UrlBuilder {
     }
 }
 
-fun url(init: UrlBuilder.() -> Unit): String {
+fun buildUrl(init: UrlBuilder.() -> Unit): String {
     return UrlBuilder().apply(init).build()
+}
+
+fun urlPath(vararg segments: String): String {
+    return segments.toList().joinToString("/", prefix = "/")
 }

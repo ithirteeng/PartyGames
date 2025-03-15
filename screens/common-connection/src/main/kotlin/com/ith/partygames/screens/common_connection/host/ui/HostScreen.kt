@@ -28,6 +28,7 @@ import com.google.zxing.BarcodeFormat
 import com.ith.partygames.screens.common_connection.R
 import com.ith.partygames.screens.common_connection.common.ui.ErrorTextBox
 import com.ith.partygames.screens.common_connection.common.ui.InfoText
+import com.ith.partygames.screens.common_connection.host.data.model.ClientNodeState
 import com.ith.partygames.screens.common_connection.host.presentation.HostEffect
 import com.ith.partygames.screens.common_connection.host.presentation.HostEvent
 import com.ith.partygames.screens.common_connection.host.presentation.HostState
@@ -35,7 +36,6 @@ import com.ith.partygames.screens.common_connection.host.presentation.HostViewMo
 import com.ith.partygames.screens.common_connection.host.presentation.HotspotState
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.ustadmobile.meshrabiya.ext.addressToDotNotation
-import com.ustadmobile.meshrabiya.vnet.VirtualNode
 import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 import kotlin.math.min
@@ -152,28 +152,31 @@ private fun HotspotActivatedContent(
         }
 
         items(
-            items = state.localNodeState.nodes.entries.toList(),
-            key = { it.key }
-        ) { nodeEntry ->
-            NodeListItem(
-                nodeAddr = nodeEntry.key,
-                nodeEntry = nodeEntry.value
-            )
+            items = state.clientNodes,
+            key = { it.nodeAddress }
+        ) { clientNode ->
+            NodeListItem(clientNode)
         }
     }
 }
 
 @Composable
 fun NodeListItem(
-    nodeAddr: Int,
-    nodeEntry: VirtualNode.LastOriginatorMessage,
+    clientNodeState: ClientNodeState,
     onClick: (() -> Unit)? = null,
 ) {
     Column {
-        Text(nodeAddr.addressToDotNotation() + ": ${nodeEntry.originatorMessage.connectConfig ?: "popa"}: ${nodeEntry.deviceName ?: "popa"}")
         Text(
-            "Ping ${nodeEntry.originatorMessage.pingTimeSum}ms " +
-                    " Hops: ${nodeEntry.hopCount} "
+            text = clientNodeState.nodeAddress.addressToDotNotation() +
+                    ": ${clientNodeState.info.originatorMessage.connectConfig ?: "popa"}: " +
+                    (clientNodeState.info.deviceName ?: "popa")
+        )
+        Text(
+            text = "isReady: ${clientNodeState.isReady}"
+        )
+        Text(
+            "Ping ${clientNodeState.info.originatorMessage.pingTimeSum}ms " +
+                    " Hops: ${clientNodeState.info.hopCount} "
         )
     }
 }

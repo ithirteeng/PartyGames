@@ -7,9 +7,7 @@ import com.ith.partygames.common.architecture.ComplexViewModel
 import com.ith.partygames.screens.common_connection.host.domain.HostRepository
 import com.ith.partygames.screens.common_connection.host.navigation.HostRoute
 import com.ustadmobile.meshrabiya.vnet.AndroidVirtualNode
-import com.ustadmobile.meshrabiya.vnet.wifi.ConnectBand
-import com.ustadmobile.meshrabiya.vnet.wifi.HotspotType
-import com.ustadmobile.meshrabiya.vnet.wifi.WifiDirectError
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 internal class HostViewModel(
@@ -19,21 +17,18 @@ internal class HostViewModel(
 ) : ComplexViewModel<HostState, HostEvent, HostEffect>() {
 
     init {
-        viewModelScope.launch {
-            androidVirtualNode.state.collect { nodeState ->
-                updateState { oldState ->
-                    oldState.copy(
-                        localNodeState = oldState.localNodeState.copy(
-                            localAddress = nodeState.address,
-                            deviceName = nodeState.deviceName,
-                            wifiState = nodeState.wifiState,
-                            bluetoothState = nodeState.bluetoothState,
-                            connectUri = nodeState.connectUri,
-                            nodes = nodeState.originatorMessages
-                        )
-                    )
-                }
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.localNodeState.collect { nodeState ->
+                updateState { oldState -> oldState.copy(localNodeState = nodeState) }
             }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.clientNodes.collect { clientNodes ->
+                updateState { oldState -> oldState.copy(clientNodes = clientNodes) }
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.init()
         }
     }
 
@@ -42,10 +37,10 @@ internal class HostViewModel(
     override fun processEvent(event: HostEvent) {
         super.processEvent(event)
         when (event) {
-            HostEvent.StartHotspotHostEvent -> startHotspot()
-            HostEvent.StartGameHostEvent -> {}
-            HostEvent.StopHotspotEvent -> stopHotspot()
-            HostEvent.Init -> init()
+            is HostEvent.Init -> init()
+            is HostEvent.StartGameHostEvent -> { /*todo: implement*/ }
+            is HostEvent.StartHotspotHostEvent -> startHotspot()
+            is HostEvent.StopHotspotEvent -> stopHotspot()
         }
     }
 
@@ -58,30 +53,31 @@ internal class HostViewModel(
     }
 
     private fun startHotspot() = viewModelScope.launch {
-        val response = androidVirtualNode.setWifiHotspotEnabled(
-            enabled = true,
-            preferredBand = ConnectBand.BAND_5GHZ,
-            hotspotType = HotspotType.AUTO
-        )
-        if (response != null && response.errorCode != 0) {
-            val error = WifiDirectError.errorString(response.errorCode)
-            updateState { oldState ->
-                oldState.copy(hotspotState = HotspotState.Init(error))
+        repository.enableHotspot()
+            .onSuccess {
+                updateState { oldState ->
+                    oldState.copy(hotspotState = HotspotState.HotspotActivated)
+                }
             }
-            sendEffect(HostEffect.ShowErrorMessage(error))
-        } else {
-            updateState { oldState ->
-                oldState.copy(hotspotState = HotspotState.HotspotActivated)
-            }
-        }
+            .onFailure { showError(it.message) }
     }
 
     private fun stopHotspot() {
         viewModelScope.launch {
-            androidVirtualNode.setWifiHotspotEnabled(enabled = false)
-            updateState { oldState ->
-                oldState.copy(hotspotState = HotspotState.Init())
-            }
+            repository.disableHotspot()
+                .onSuccess {
+                    updateState { oldState ->
+                        oldState.copy(hotspotState = HotspotState.Init())
+                    }
+                }
+                .onFailure { showError(it.message) }
         }
+    }
+
+    private fun showError(message: String?) {
+        updateState { oldState ->
+            oldState.copy(hotspotState = HotspotState.Init(message))
+        }
+        sendEffect(HostEffect.ShowErrorMessage(message))
     }
 }

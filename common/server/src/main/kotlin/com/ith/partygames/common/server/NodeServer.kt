@@ -18,10 +18,8 @@ class NodeServer(
     }
 
     companion object {
-        const val TYPE_HOST = "TYPE_HOST"
-        const val TYPE_CLIENT = "TYPE_CLIENT"
-        const val HOST_PORT = 4232
-        const val CLIENT_PORT = 4322
+        const val HOST_PORT = 41242
+        const val CLIENT_PORT = 14322
     }
 }
 

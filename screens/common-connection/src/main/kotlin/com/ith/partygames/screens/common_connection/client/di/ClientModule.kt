@@ -1,5 +1,6 @@
 package com.ith.partygames.screens.common_connection.client.di
 
+import com.ith.partygames.common.server.NodeServer
 import com.ith.partygames.screens.common_connection.client.data.ClientRepositoryImpl
 import com.ith.partygames.screens.common_connection.client.domain.ClientRepository
 import com.ith.partygames.screens.common_connection.client.presentation.ClientViewModel
@@ -11,7 +12,9 @@ internal val clientModule = module {
 
     single<ClientRepository> {
         ClientRepositoryImpl(
-            server = get(named(com.ith.partygames.common.server.NodeServer.TYPE_CLIENT))
+            clientServer = get(named(NodeServer.TYPE_CLIENT)),
+            hostServer = get(named(NodeServer.TYPE_HOST)),
+            okHttpClient = get()
         )
     }
 
