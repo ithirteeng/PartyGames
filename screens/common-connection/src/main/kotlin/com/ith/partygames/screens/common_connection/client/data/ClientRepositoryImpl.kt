@@ -21,7 +21,7 @@ internal class ClientRepositoryImpl(
     ): Result<String?> = okHttpClient.makeGetRequest(
         url = buildUrl {
             host(toAddress)
-            port(NodeServer.HOST_PORT)
+            port(NodeServer.DEFAULT_PORT)
             path(CLIENT, READY_TO_PLAY)
             queryParam(FROM_ADDRESS_PARAM, fromAddress.requireAddressAsInt().toString())
         }

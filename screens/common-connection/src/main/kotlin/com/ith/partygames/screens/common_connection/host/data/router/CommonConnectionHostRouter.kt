@@ -5,13 +5,16 @@ import com.ith.partygames.common.server.GameServerRouter
 import com.ith.partygames.screens.common_connection.common.data.CLIENT
 import com.ith.partygames.screens.common_connection.common.data.FROM_ADDRESS_PARAM
 import com.ith.partygames.screens.common_connection.common.data.READY_TO_PLAY
+import com.ith.partygames.screens.common_connection.host.domain.HostRepository
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoHTTPD.IHTTPSession
 import fi.iki.elonen.NanoHTTPD.MIME_PLAINTEXT
 import fi.iki.elonen.NanoHTTPD.Response
 import fi.iki.elonen.NanoHTTPD.newFixedLengthResponse
 
-internal class CommonConnectionHostRouter : GameServerRouter() {
+internal class CommonConnectionHostRouter(
+    private val hostRepository: HostRepository,
+) : GameServerRouter() {
 
     override fun handleSession(session: IHTTPSession) {
         addSessionHandlers(
@@ -31,7 +34,7 @@ internal class CommonConnectionHostRouter : GameServerRouter() {
             return if (params.containsKey(FROM_ADDRESS_PARAM)) {
                 try {
                     val address = params[FROM_ADDRESS_PARAM]?.firstOrNull().toString().toInt()
-//                    repositoryImpl.setNodeIsReady(address)
+                    hostRepository.setNodeIsReady(address)
                     newFixedLengthResponse(
                         Response.Status.OK,
                         MIME_PLAINTEXT,

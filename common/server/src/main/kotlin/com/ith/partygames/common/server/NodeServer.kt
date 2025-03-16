@@ -18,8 +18,7 @@ class NodeServer(
     }
 
     companion object {
-        const val HOST_PORT = 41242
-        const val CLIENT_PORT = 14322
+        const val DEFAULT_PORT = 41242
     }
 }
 

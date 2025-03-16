@@ -8,7 +8,7 @@ val commonServerModule = module {
 
     single {
         NodeServer(
-            port = NodeServer.HOST_PORT,
+            port = NodeServer.DEFAULT_PORT,
             routers = getAll<GameServerRouter>()
         )
     }

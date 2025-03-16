@@ -45,8 +45,6 @@ internal class HostViewModel(
     }
 
     private fun init() {
-        repository.startServer()
-
         val arguments = savedStateHandle.toRoute<HostRoute>()
         updateState { oldState -> oldState.copy(gameType = arguments.gameType) }
         androidVirtualNode.setGameType(arguments.gameType)

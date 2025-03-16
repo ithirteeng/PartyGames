@@ -63,12 +63,17 @@ internal class HostRepositoryImpl(
     private suspend fun collectAndroidVirtualNodeState() {
         androidVirtualNode.state.collect { nodeState ->
             _clientNodes.update { oldNodes ->
+                val intersectIds = nodeState.originatorMessages.keys.intersect(oldNodes.map { it.nodeAddress })
+                val newNodes = oldNodes.toMutableList()
+                newNodes.removeIf { it.nodeAddress !in intersectIds }
+
                 nodeState.originatorMessages.map { pair ->
-                    oldNodes.find { it.nodeAddress == pair.key } ?: ClientNodeState(
+                    newNodes.find { it.nodeAddress == pair.key } ?: ClientNodeState(
                         nodeAddress = pair.key,
                         info = pair.value
                     )
                 }
+                newNodes
             }
             _localNodeState.update { oldState ->
                 oldState.copy(
